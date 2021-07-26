@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "miom"
-version = "0.9.0-alpha.0"
+version = "0.9.0-alpha.1"
 description = "Mixed Integer Optimization for Metabolism"
-authors = ["Pablo R. Mier <pablo.rodriguez,mier@gmail.com>"]
+authors = ["Pablo R. Mier <pablo.rodriguez.mier@gmail.com>"]
 keywords = ["optimization", "LP", "MIP", "metabolism", "metabolic-networks"]
 license = "GPLv3"
 include = [
