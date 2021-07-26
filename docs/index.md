@@ -91,7 +91,7 @@ print("Number of active reactions (with non-zero flux):", sum(abs(V) > 1e-8))
 Number of active reactions (with non-zero flux): 404
 ```
 
-Solving this problem with default COIN-OR CBC solver returns a solution with 404 active reactions (much less than the 2549 reactions obtained with FBA, and less than the 433 reactions returned by the CappedL1 approximation in the [sparseFBA](https://opencobra.github.io/cobratoolbox/stable/modules/analysis/sparseFBA/index.html) implementation in Matlab), with a relative gap between the lower and upper objective bound below 5% (as indicated in the setup method):
+Solving this problem with default COIN-OR CBC solver returns a solution with 404 active reactions (much less than the 2549 reactions obtained with FBA, and less than the 433 reactions returned by the CappedL1 approximation in the [sparse FBA](https://opencobra.github.io/cobratoolbox/stable/modules/analysis/sparseFBA/index.html) implementation in Matlab), with a relative gap between the lower and upper objective bound below 5% (as indicated in the setup method):
 
 ```
 Cbc0011I Exiting as integer gap of 122.04538 less than 1e-10 or 5%
