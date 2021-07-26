@@ -1,5 +1,6 @@
 # Introduction
 [![Run In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1JAOEHLlRCW8GziIpBqkFwJL2ha3OEOWJ?usp=sharing)
+![Tests](https://github.com/metexplore/miom/actions/workflows/unit-tests.yml/badge.svg)
 
 https://metexplore.github.io/miom
 
