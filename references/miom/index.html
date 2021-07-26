@@ -1,0 +1,1386 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.0">
+    
+    
+      
+        <title>miom.py - MIOM</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.fe914879.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ba0d045b.min.css">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    
+      
+
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    <script>function __prefix(e){return new URL("../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#miompy" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="MIOM" class="md-header__button md-logo" aria-label="MIOM" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            MIOM
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              miom.py
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="MIOM" class="md-nav__button md-logo" aria-label="MIOM" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    MIOM
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Introduction
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      <label class="md-nav__link" for="__nav_2">
+        Examples
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Examples" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Examples
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/fastcore/" class="md-nav__link">
+        Exact Fastcore (MIP)
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/fba/" class="md-nav__link">
+        Flux Balance Analysis (LP)
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/imat/" class="md-nav__link">
+        iMAT: Integrative Metabolic Analysis Tool (MIP)
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/sparse_fba/" class="md-nav__link">
+        Sparse FBA (MIP)
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
+      
+      <label class="md-nav__link" for="__nav_3">
+        References
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="References" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          References
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mio/" class="md-nav__link">
+        mio.py
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          miom.py
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        miom.py
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#miom.miom" class="md-nav__link">
+    miom.miom
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel" class="md-nav__link">
+    BaseModel
+  </a>
+  
+    <nav class="md-nav" aria-label="BaseModel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.select_subnetwork" class="md-nav__link">
+    select_subnetwork()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.setup" class="md-nav__link">
+    setup()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.subset_selection" class="md-nav__link">
+    subset_selection()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#miom.miom.Comparator" class="md-nav__link">
+    Comparator
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#miom.miom.ExtractionMode" class="md-nav__link">
+    ExtractionMode
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#miom.miom.Solvers" class="md-nav__link">
+    Solvers
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#miom.miom.miom" class="md-nav__link">
+    miom()
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#miom.miom" class="md-nav__link">
+    miom.miom
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel" class="md-nav__link">
+    BaseModel
+  </a>
+  
+    <nav class="md-nav" aria-label="BaseModel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.select_subnetwork" class="md-nav__link">
+    select_subnetwork()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.setup" class="md-nav__link">
+    setup()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.subset_selection" class="md-nav__link">
+    subset_selection()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#miom.miom.Comparator" class="md-nav__link">
+    Comparator
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#miom.miom.ExtractionMode" class="md-nav__link">
+    ExtractionMode
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#miom.miom.Solvers" class="md-nav__link">
+    Solvers
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#miom.miom.miom" class="md-nav__link">
+    miom()
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                
+                <h1 id="miompy">miom.py</h1>
+
+
+  <div class="doc doc-object doc-module">
+
+<a id="miom.miom"></a>
+    <div class="doc doc-contents first">
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h2 id="miom.miom.BaseModel" class="doc doc-heading">
+        <code>BaseModel</code>
+
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Base class for building LP/MIP metabolic models.</p>
+<p>It implements the chainable methods to set-up a LP/MIP 
+metabolic network problem.</p>
+<p>Two implementations are available: PicosModel and PythonMipModel. 
+The PicosModel uses the <a href="https://picos-api.gitlab.io/picos/">PICOS library</a> 
+as a backend to interact with different solvers. The PythonMipModel uses 
+the <a href="https://www.python-mip.com/">Python-MIP</a> library to solve the
+model using the CBC or GUROBI solvers.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Do not try to instantiate this class directly. Use the <a href="#miom.miom.miom">miom()</a> 
+function instead. The method automatically selects the right implementation 
+depending on the solver.</p>
+</div>
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="miom.miom.BaseModel.select_subnetwork" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">select_subnetwork</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=&lt;</span><span class="n">ExtractionMode</span><span class="o">.</span><span class="n">ABSOLUTE_FLUX_VALUE</span><span class="p">:</span> <span class="s1">&#39;flux_value&#39;</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">comparator</span><span class="o">=&lt;</span><span class="n">Comparator</span><span class="o">.</span><span class="n">GREATER_OR_EQUAL</span><span class="p">:</span> <span class="s1">&#39;geq&#39;</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">1e-06</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Select a subnetwork and create a new BaseModel to operate on it.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>mode</code></td>
+        <td><code>[type]</code></td>
+        <td><p>[description]. Defaults to ExtractionMode.ABSOLUTE_FLUX_VALUE.</p></td>
+        <td><code>&lt;ExtractionMode.ABSOLUTE_FLUX_VALUE: &#39;flux_value&#39;&gt;</code></td>
+      </tr>
+      <tr>
+        <td><code>comparator</code></td>
+        <td><code>[type]</code></td>
+        <td><p>[description]. Defaults to Comparator.GREATER_OR_EQUAL.</p></td>
+        <td><code>&lt;Comparator.GREATER_OR_EQUAL: &#39;geq&#39;&gt;</code></td>
+      </tr>
+      <tr>
+        <td><code>value</code></td>
+        <td><code>[type]</code></td>
+        <td><p>[description]. Defaults to 1e-6.</p></td>
+        <td><code>1e-06</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>[type]</code></td>
+      <td><p>[description]</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>miom\miom.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@_autochain</span>
+<span class="k">def</span> <span class="nf">select_subnetwork</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">mode</span><span class="o">=</span><span class="n">ExtractionMode</span><span class="o">.</span><span class="n">ABSOLUTE_FLUX_VALUE</span><span class="p">,</span>
+        <span class="n">comparator</span><span class="o">=</span><span class="n">Comparator</span><span class="o">.</span><span class="n">GREATER_OR_EQUAL</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="mf">1e-6</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Select a subnetwork and create a new BaseModel to operate on it.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mode ([type], optional): [description]. Defaults to ExtractionMode.ABSOLUTE_FLUX_VALUE.</span>
+<span class="sd">        comparator ([type], optional): [description]. Defaults to Comparator.GREATER_OR_EQUAL.</span>
+<span class="sd">        value ([type], optional): [description]. Defaults to 1e-6.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        [type]: [description]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">obtain_subnetwork</span><span class="p">(</span><span class="n">extraction_mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
+                                  <span class="n">comparator</span><span class="o">=</span><span class="n">comparator</span><span class="p">,</span>
+                                  <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="miom.miom.BaseModel.setup" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Provide the options for the solver</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>[type]</code></td>
+      <td><p>[description]</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>miom\miom.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@_autochain</span>
+<span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Provide the options for the solver</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        [type]: [description]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Problem cannot be configured since it was not initialized&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">int_tol</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;int_tol&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;int_tol&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">feas_tol</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;feas_tol&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;feas_tol&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">opt_tol</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;opt_tol&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;opt_tol&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">verbosity</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;verbosity&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;verbosity&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">solver</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;solver&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;solver&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">int_tol</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">options</span><span class="p">[</span><span class="s2">&quot;int_tol&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">int_tol</span>
+    <span class="k">if</span> <span class="n">feas_tol</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">options</span><span class="p">[</span><span class="s2">&quot;feas_tol&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">feas_tol</span>
+    <span class="k">if</span> <span class="n">opt_tol</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">options</span><span class="p">[</span><span class="s2">&quot;opt_tol&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">opt_tol</span>
+    <span class="k">if</span> <span class="n">verbosity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">options</span><span class="p">[</span><span class="s2">&quot;verbosity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">verbosity</span>
+    <span class="k">if</span> <span class="n">solver</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">options</span><span class="p">[</span><span class="s2">&quot;solver&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">solver</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_options</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+    <span class="c1"># Calculate a min eps value to avoid numerical issues</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_options</span><span class="p">[</span><span class="s2">&quot;_min_eps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_options</span><span class="p">[</span><span class="s2">&quot;int_tol&quot;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_options</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="miom.miom.BaseModel.subset_selection" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">subset_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rxn_weights</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Transform the current model into a subset selection problem.</p>
+<p>The subset selection problem consists of selecting the positive weighted
+reactions and remove the negative weighted reactions, subject to steady
+state constraints and/or additional constraints on fluxes, and maximizing
+the weighted sum of the (absolute) weights for the successfully selected reactions
+(with positive weights) and the successfully removed reactions (with negative
+weights)</p>
+<p>Each reaction is associated with a weight (positive or negative) provided
+in the parameter <code>rxn_weights</code>, and the objective is to select the reactions 
+that optimizes the following expression:</p>
+<div class="arithmatex">\[
+f(x) = \sum_i^n |w_i| * x_i
+\]</div>
+<p>where <span class="arithmatex">\(x_i\)</span> are the indicator variables for the reactions <span class="arithmatex">\(i\)</span> and <span class="arithmatex">\(w_i\)</span> are
+the weights for the reactions associated to the indicator variable. Indicator
+variables are automatically created for each reaction associated to a non-zero
+weight. Two (mutually exclusive) indicator variables are used for positive weighted reactions 
+that are reversible to indicate whether there is positive or negative flux 
+through the reaction. A single indicator variable is created for positive weighted
+non-reversible reactions, to indicate if the reaction is selected (has a non-zero flux)
+in which case the indicator variable is 1, or 0 otherwise. </p>
+<p>A single binary indicator variable is also created for negative weighted reactions, 
+indicating whether the reaction was not selected (i.e, has 0 flux, in which case the
+indicator variable is 1) or not (in which case the indicator variable is 0).</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>rxn_weights</code></td>
+        <td><code>list</code></td>
+        <td><p>List of weights for each reaction.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>eps</code></td>
+        <td><code>float</code></td>
+        <td><p>Min absolute flux value for weighted reactions
+to consider them active or inactive. Defaults to 1e-2.</p></td>
+        <td><code>0.01</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>BaseModel</code></td>
+      <td><p>instance of BaseModel with the modifications applied.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>miom\miom.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@_autochain</span>
+<span class="k">def</span> <span class="nf">subset_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rxn_weights</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transform the current model into a subset selection problem.</span>
+
+<span class="sd">    The subset selection problem consists of selecting the positive weighted</span>
+<span class="sd">    reactions and remove the negative weighted reactions, subject to steady</span>
+<span class="sd">    state constraints and/or additional constraints on fluxes, and maximizing</span>
+<span class="sd">    the weighted sum of the (absolute) weights for the successfully selected reactions</span>
+<span class="sd">    (with positive weights) and the successfully removed reactions (with negative</span>
+<span class="sd">    weights)</span>
+
+<span class="sd">    Each reaction is associated with a weight (positive or negative) provided</span>
+<span class="sd">    in the parameter `rxn_weights`, and the objective is to select the reactions </span>
+<span class="sd">    that optimizes the following expression:</span>
+
+<span class="sd">    $$</span>
+<span class="sd">    f(x) = \sum_i^n |w_i| * x_i</span>
+<span class="sd">    $$</span>
+
+<span class="sd">    where $x_i$ are the indicator variables for the reactions $i$ and $w_i$ are</span>
+<span class="sd">    the weights for the reactions associated to the indicator variable. Indicator</span>
+<span class="sd">    variables are automatically created for each reaction associated to a non-zero</span>
+<span class="sd">    weight. Two (mutually exclusive) indicator variables are used for positive weighted reactions </span>
+<span class="sd">    that are reversible to indicate whether there is positive or negative flux </span>
+<span class="sd">    through the reaction. A single indicator variable is created for positive weighted</span>
+<span class="sd">    non-reversible reactions, to indicate if the reaction is selected (has a non-zero flux)</span>
+<span class="sd">    in which case the indicator variable is 1, or 0 otherwise. </span>
+
+<span class="sd">    A single binary indicator variable is also created for negative weighted reactions, </span>
+<span class="sd">    indicating whether the reaction was not selected (i.e, has 0 flux, in which case the</span>
+<span class="sd">    indicator variable is 1) or not (in which case the indicator variable is 0).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        rxn_weights (list): List of weights for each reaction.</span>
+<span class="sd">        eps (float, optional): Min absolute flux value for weighted reactions</span>
+<span class="sd">            to consider them active or inactive. Defaults to 1e-2.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        BaseModel: instance of BaseModel with the modifications applied.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Calculate min valid EPS based on integrality tolerance</span>
+    <span class="n">min_eps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_options</span><span class="p">[</span><span class="s2">&quot;_min_eps&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">eps</span> <span class="o">&lt;</span> <span class="n">min_eps</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The minimum epsilon value is </span><span class="si">{</span><span class="n">min_eps</span><span class="si">}</span><span class="s2">, which is less than </span><span class="si">{</span><span class="n">eps</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">eps</span><span class="p">,</span> <span class="n">min_eps</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rxn_weights</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+        <span class="n">rxn_weights</span> <span class="o">=</span> <span class="p">[</span><span class="n">rxn_weights</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">num_reactions</span>
+    <span class="n">rxnw</span> <span class="o">=</span> <span class="n">_weighted_rxns</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">R</span><span class="p">,</span> <span class="n">rxn_weights</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">indicators</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">_assigned_reactions</span> <span class="o">=</span> <span class="n">rxnw</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Indicator variables were already assigned&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h2 id="miom.miom.Comparator" class="doc doc-heading">
+        <code>Comparator</code>
+
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Comparator enum to use with <a href="#miom.miom.BaseModel">select_subnetwork()</a></p>
+
+<p><strong>Attributes:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>GREATER_OR_EQUAL</code></td>
+        <td><code>str</code></td>
+        <td><p>Select those variables 
+with a value greater or equal than the one provided.</p></td>
+      </tr>
+      <tr>
+        <td><code>LESS_OR_EQUAL</code></td>
+        <td><code>str</code></td>
+        <td><p>Select those variables 
+with a value less or equal than the one provided.</p></td>
+      </tr>
+  </tbody>
+</table>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h2 id="miom.miom.ExtractionMode" class="doc doc-heading">
+        <code>ExtractionMode</code>
+
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Method to select the subnetwork to be extracted.</p>
+<p>This mode works with the method <a href="#miom.miom.BaseModel">select_subnetwork</a> 
+only after a subset selection problem was succesfully solved.
+If the model is configured as a subset selection problem, the user can
+extract a subnetwork after the method solve() was called. The selection
+of the subnetwork can be done using the indicator variables or the flux
+variables.</p>
+<p>For more information, please read the documentation of the method
+<a href="#miom.miom.BaseModel">subset_selection</a></p>
+
+<p><strong>Attributes:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>ABSOLUTE_FLUX_VALUE</code></td>
+        <td><code>str</code></td>
+        <td><p>Use a decision criterion based on the
+value of the fluxes. For example, by selecting all the reactions
+that have an absolute flux value above a certain threshold.</p></td>
+      </tr>
+      <tr>
+        <td><code>INDICATOR_VALUE</code></td>
+        <td><code>str</code></td>
+        <td><p>Use the binary indicator variables to select
+the subnetwork. Binary indicator variables are created for a
+subset selection problem (after calling <a href="#miom.miom.BaseModel">subset_selection</a>).
+Two indicators are created for each positive weighted and reversible reaction,
+to indicate if there is a non-zero positive flux or negative flux respectively.
+A single binary indicator variable is created for each negative weighted reaction.
+In this case, an indicator value of 1 indicates that the reaction was succesfully
+removed, and 0 otherwise. You can use the value of the indicator variables to
+select a subnetwork after solving. For example, if all the reactions have a
+negative weight (since the goal is, for example, to minimize the number of 
+reactions subject to some other constraints) and you want to select only the
+reactions that were not removed after solving, you can use the indicator
+variables with a value of 0.</p>
+<p>Usage example:
+<div class="highlight"><pre><span></span><code>    <span class="n">m</span><span class="o">.</span>
+    <span class="n">steady_state</span><span class="p">()</span><span class="o">.</span>
+    <span class="n">add_constraints</span><span class="p">(</span><span class="o">...</span><span class="p">)</span><span class="o">.</span>
+    <span class="c1"># Convert to a subset selection, where each reaction</span>
+    <span class="c1"># has a weight of -1.</span>
+    <span class="n">subset_selection</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span>
+    <span class="c1"># Solve the optimization problem</span>
+    <span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+    <span class="c1"># Get the subnetwork selecting the reactions</span>
+    <span class="c1"># with an indicator value below 0.5. Since variables</span>
+    <span class="c1"># are binary, it basically selects all the reactions</span>
+    <span class="c1"># associated with a binary indicator value of 0.</span>
+    <span class="c1"># This corresponds to the reactions that were not</span>
+    <span class="c1"># removed after solving the problem (since all the</span>
+    <span class="c1"># reactions have negative weights, and their binary</span>
+    <span class="c1"># indicator variables are 1 if they were successfully</span>
+    <span class="c1"># removed, and 0 if they could not be removed).</span>
+    <span class="o">.</span><span class="n">select_subnetwork</span><span class="p">(</span>
+        <span class="n">mode</span><span class="o">=</span><span class="n">ExtractionMode</span><span class="o">.</span><span class="n">INDICATOR_VALUE</span><span class="p">,</span>
+        <span class="n">comparator</span><span class="o">=</span><span class="n">Comparator</span><span class="o">.</span><span class="n">LESS_OR_EQUAL</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="mf">0.5</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">network</span>
+</code></pre></div></p></td>
+      </tr>
+  </tbody>
+</table>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h2 id="miom.miom.Solvers" class="doc doc-heading">
+        <code>Solvers</code>
+
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Solvers supported by the miom module.</p>
+<p>Please refer to https://picos-api.gitlab.io/picos/introduction.html to see
+the list of supported solvers using the PICOS backend. The Python-MIP backend
+only supports the GUROBI and CBC solvers.</p>
+<p>Note that in some cases, the Python-MIP backend (GUROBI/CBC) might be faster
+setting up the problem than the PICOS backend since it has less overhead.</p>
+
+<p><strong>Attributes:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>GUROBI_PYMIP</code></td>
+        <td><code>str</code></td>
+        <td><p>Recommended solver for most problems (LP, MIP).
+It uses the Python-MIP backend. Note that GUROBI is a commercial
+software which require a license. Free academic licenses are 
+also available at https://gurobi.com/free/.</p></td>
+      </tr>
+      <tr>
+        <td><code>GUROBI</code></td>
+        <td><code>str</code></td>
+        <td><p>For using GUROBI with the PICOS backend instead of Python-MIP.</p></td>
+      </tr>
+      <tr>
+        <td><code>COIN_OR_CBC</code></td>
+        <td><code>str</code></td>
+        <td><p>Free LP/MIP solver with good performance, provided with Python-MIP.</p></td>
+      </tr>
+      <tr>
+        <td><code>CPLEX</code></td>
+        <td><code>str</code></td>
+        <td><p>Commercial solver with a performance similar to GUROBI. Only
+supported by the PICOS backend.</p></td>
+      </tr>
+      <tr>
+        <td><code>SCIP</code></td>
+        <td><code>str</code></td>
+        <td><p>Free academic solver, supported by the PICOS backend.</p></td>
+      </tr>
+      <tr>
+        <td><code>GLPK</code></td>
+        <td><code>str</code></td>
+        <td><p>Open source solver, supported by the PICOS backend.</p></td>
+      </tr>
+      <tr>
+        <td><code>MOSEK</code></td>
+        <td><code>str</code></td>
+        <td><p>Commercial solver, supported by the PICOS backend.</p></td>
+      </tr>
+  </tbody>
+</table>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="miom.miom.miom" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">miom</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">solver</span><span class="o">=&lt;</span><span class="n">Solvers</span><span class="o">.</span><span class="n">COIN_OR_CBC</span><span class="p">:</span> <span class="s1">&#39;cbc&#39;</span><span class="o">&gt;</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Create a MIOM optimization model for a given solver.
+If the solver is Coin-OR CBC, an instance of PythonMipModel is used
+(which uses the Python-MIP lib as the backend). Otherwise, a PicosModel
+is created (which uses PICOS as the backend).</p>
+
+<p><strong>Examples:</strong></p>
+    <p>Example of how to perform FBA to maximize flux through the
+BIOMASS_reaction in the iMM1865 model:</p>
+<div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">miom</span> <span class="kn">import</span> <span class="n">miom</span><span class="p">,</span> <span class="n">load_gem</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">network</span> <span class="o">=</span> <span class="n">load_gem</span><span class="p">(</span><span class="s2">&quot;https://github.com/pablormier/miom-gems/raw/main/gems/mus_musculus_iMM1865.miom&quot;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">V</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">miom</span><span class="p">(</span><span class="n">network</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">steady_state</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">set_rxn_objective</span><span class="p">(</span><span class="s2">&quot;BIOMASS_reaction&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">get_values</span><span class="p">())</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>network</code></td>
+        <td><code>miom_network</code></td>
+        <td><p>A miom metabolic network. A metabolic network
+can be imported with the <a href="../mio/#miom.mio.load_gem">load_gem</a> function.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>solver</code></td>
+        <td><code>Solver</code></td>
+        <td><p>The solver to be used. Defaults to Solver.GLPK.</p></td>
+        <td><code>&lt;Solvers.COIN_OR_CBC: &#39;cbc&#39;&gt;</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>BaseModel</code></td>
+      <td><p>A BaseModel object, which can be PythonMipModel if CBC solver is
+    used, or a PicosModel otherwise.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>miom\miom.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">miom</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">Solvers</span><span class="o">.</span><span class="n">COIN_OR_CBC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a MIOM optimization model for a given solver.</span>
+<span class="sd">    If the solver is Coin-OR CBC, an instance of PythonMipModel is used</span>
+<span class="sd">    (which uses the Python-MIP lib as the backend). Otherwise, a PicosModel</span>
+<span class="sd">    is created (which uses PICOS as the backend).</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        Example of how to perform FBA to maximize flux through the</span>
+<span class="sd">        BIOMASS_reaction in the iMM1865 model:</span>
+
+<span class="sd">        ```python</span>
+<span class="sd">        &gt;&gt;&gt; from miom import miom, load_gem</span>
+<span class="sd">        &gt;&gt;&gt; network = load_gem(&quot;https://github.com/pablormier/miom-gems/raw/main/gems/mus_musculus_iMM1865.miom&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; V, _ = miom(network)</span>
+<span class="sd">                    .steady_state()</span>
+<span class="sd">                    .set_rxn_objective(&quot;BIOMASS_reaction&quot;)</span>
+<span class="sd">                    .solve(verbosity=1)</span>
+<span class="sd">                    .get_values())</span>
+<span class="sd">        ```</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        network (miom_network): A miom metabolic network. A metabolic network</span>
+<span class="sd">            can be imported with the [load_gem][miom.mio.load_gem] function.</span>
+<span class="sd">        solver (Solver, optional): The solver to be used. Defaults to Solver.GLPK.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        BaseModel: A BaseModel object, which can be PythonMipModel if CBC solver is</span>
+<span class="sd">            used, or a PicosModel otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">solver</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">solver</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">solver</span><span class="p">,</span> <span class="n">Enum</span><span class="p">)</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">solver</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">solver</span> <span class="o">==</span> <span class="s1">&#39;cbc&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">PythonMipModel</span><span class="p">(</span><span class="n">miom_network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">solver_name</span><span class="o">=</span><span class="n">solver</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">solver</span> <span class="o">==</span> <span class="s1">&#39;gurobi_pymip&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">PythonMipModel</span><span class="p">(</span><span class="n">miom_network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">solver_name</span><span class="o">=</span><span class="s1">&#39;gurobi&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">PicosModel</span><span class="p">(</span><span class="n">miom_network</span><span class="o">=</span><span class="n">network</span><span class="p">,</span> <span class="n">solver_name</span><span class="o">=</span><span class="n">solver</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="../mio/" class="md-footer__link md-footer__link--prev" aria-label="Previous: mio.py" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              mio.py
+            </div>
+          </div>
+        </a>
+      
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../../assets/javascripts/workers/search.53c85856.min.js", "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.716f8af4.min.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
