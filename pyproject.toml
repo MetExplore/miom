@@ -5,23 +5,26 @@ description = "Mixed Integer Optimization for Metabolism"
 authors = ["Pablo R. Mier <pablo.rodriguez.mier@gmail.com>"]
 keywords = ["optimization", "LP", "MIP", "metabolism", "metabolic-networks"]
 license = "GPLv3"
+readme = "README.md"
+repository = "https://github.com/MetExplore/miom/"
+homepage = "https://github.com/MetExplore/miom/"
 include = [
 	"LICENSE"
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
-numpy = "^1.20.3"
+python = "^3.7"
+numpy = "^1.21.1"
 mip = "^1.13.0"
-picos = "^2.2.43"
+PICOS = "^2.2.52"
 gurobipy = "^9.1.2"
 swiglpk = "^5.0.3"
-mosek = "^9.2.47"
+Mosek = "^9.2.49"
 
 [tool.poetry.dev-dependencies]
-pytest = "^6.2.4"
-mkdocs-material = "^7.2.0"
+mkdocs-material = "^7.2.1"
 mkdocstrings = "^0.15.2"
+pytest = "^6.2.4"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
