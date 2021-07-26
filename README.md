@@ -8,8 +8,7 @@ But what is even better is that most of the time, algorithms formulated as Mixed
 
 MIOM uses the [PICOS](https://picos-api.gitlab.io/picos/) and the [Python-MIP](https://www.python-mip.com/) libraries to build and solve the optimization problems using many commercial, academic and free solvers.
 
-!!! warning
-     This library is functional but still in a very early stage. API is still not stable and might be changed in future versions.
+> NOTE: This library is functional but still in a very early stage. API is still not stable and might be changed in future versions.
 
 ## A quick example
 
