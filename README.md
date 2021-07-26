@@ -1,5 +1,7 @@
 # Introduction
 
+https://metexplore.github.io/miom
+
 __MIOM__ (Mixed Integer Optimization for Metabolism) is a python library for creating and solving complex optimization problems using genome-scale metabolic networks, in just a few lines. 
 
 By leveraging the power of modern Mixed Integer Optimization (MIO) solvers, it can transform any simple constraint-based problem, such as Flux Balance Analysis (FBA) into a more complex optimization problem, such as sparse FBA or context-specific reconstruction problems very easily, and solve it with the __required level of optimality__.
