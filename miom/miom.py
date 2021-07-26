@@ -1,0 +1,812 @@
+from abc import ABC, abstractmethod
+from functools import wraps
+from collections.abc import Iterable
+from miom.mio import load_gem, MiomNetwork
+import picos as pc
+import mip
+from typing import NamedTuple
+from enum import Enum, auto
+import numpy as np
+import warnings
+
+
+class Solvers(str, Enum):
+    """Solvers supported by the miom module.
+    
+    Please refer to https://picos-api.gitlab.io/picos/introduction.html to see
+    the list of supported solvers using the PICOS backend. The Python-MIP backend
+    only supports the GUROBI and CBC solvers.
+
+    Note that in some cases, the Python-MIP backend (GUROBI/CBC) might be faster
+    setting up the problem than the PICOS backend since it has less overhead.
+
+    Attributes:
+        GUROBI_PYMIP (str): Recommended solver for most problems (LP, MIP).
+            It uses the Python-MIP backend. Note that GUROBI is a commercial
+            software which require a license. Free academic licenses are 
+            also available at https://gurobi.com/free/.
+        GUROBI (str): For using GUROBI with the PICOS backend instead of Python-MIP.
+        COIN_OR_CBC (str): Free LP/MIP solver with good performance, provided with Python-MIP.
+        CPLEX (str): Commercial solver with a performance similar to GUROBI. Only
+            supported by the PICOS backend.
+        SCIP (str): Free academic solver, supported by the PICOS backend.
+        GLPK (str): Open source solver, supported by the PICOS backend.
+        MOSEK (str): Commercial solver, supported by the PICOS backend.
+    """
+    GUROBI_PYMIP = "gurobi_pymip",
+    GUROBI = "gurobi",
+    COIN_OR_CBC = "cbc",
+    CPLEX = "cplex",
+    GLPK = "glpk",
+    SCIP = "scip",
+    CVXOPT = "cvxopt",
+    MOSEK = "mosek"
+
+class _ReactionType(Enum):
+    RH_POS = auto(),
+    RH_NEG = auto(),
+    RL = auto()
+
+
+class ExtractionMode(str, Enum):
+    """Method to select the subnetwork to be extracted.
+
+    This mode works with the method [select_subnetwork][miom.miom.BaseModel] 
+    only after a subset selection problem was succesfully solved.
+    If the model is configured as a subset selection problem, the user can
+    extract a subnetwork after the method solve() was called. The selection
+    of the subnetwork can be done using the indicator variables or the flux
+    variables.
+
+    For more information, please read the documentation of the method
+    [subset_selection][miom.miom.BaseModel]
+
+    Attributes:
+        ABSOLUTE_FLUX_VALUE (str): Use a decision criterion based on the
+            value of the fluxes. For example, by selecting all the reactions
+            that have an absolute flux value above a certain threshold.
+
+        INDICATOR_VALUE (str): Use the binary indicator variables to select
+            the subnetwork. Binary indicator variables are created for a
+            subset selection problem (after calling [subset_selection][miom.miom.BaseModel]).
+            Two indicators are created for each positive weighted and reversible reaction,
+            to indicate if there is a non-zero positive flux or negative flux respectively.
+            A single binary indicator variable is created for each negative weighted reaction.
+            In this case, an indicator value of 1 indicates that the reaction was succesfully
+            removed, and 0 otherwise. You can use the value of the indicator variables to
+            select a subnetwork after solving. For example, if all the reactions have a
+            negative weight (since the goal is, for example, to minimize the number of 
+            reactions subject to some other constraints) and you want to select only the
+            reactions that were not removed after solving, you can use the indicator
+            variables with a value of 0.
+
+            Usage example:
+            ```python
+                m.
+                steady_state().
+                add_constraints(...).
+                # Convert to a subset selection, where each reaction
+                # has a weight of -1.
+                subset_selection(-1).
+                # Solve the optimization problem
+                .solve()
+                # Get the subnetwork selecting the reactions
+                # with an indicator value below 0.5. Since variables
+                # are binary, it basically selects all the reactions
+                # associated with a binary indicator value of 0.
+                # This corresponds to the reactions that were not
+                # removed after solving the problem (since all the
+                # reactions have negative weights, and their binary
+                # indicator variables are 1 if they were successfully
+                # removed, and 0 if they could not be removed).
+                .select_subnetwork(
+                    mode=ExtractionMode.INDICATOR_VALUE,
+                    comparator=Comparator.LESS_OR_EQUAL,
+                    value=0.5
+                ).network
+            ```
+    """
+    ABSOLUTE_FLUX_VALUE = "flux_value",
+    INDICATOR_VALUE = "indicator_value"
+
+
+class Comparator(str, Enum):
+    """Comparator enum to use with [select_subnetwork()][miom.miom.BaseModel]
+
+    Attributes:
+        GREATER_OR_EQUAL (str): Select those variables 
+            with a value greater or equal than the one provided.
+        LESS_OR_EQUAL (str): Select those variables 
+            with a value less or equal than the one provided.
+    """
+    GREATER_OR_EQUAL = "geq",
+    LESS_OR_EQUAL = "leq"
+
+
+_RxnVar = NamedTuple(
+    "RxnVar", [
+        ("index", int),
+        ("id", int),
+        ("lb", float),
+        ("ub", float),
+        ("cost", float),
+        ("type", _ReactionType)
+    ])
+
+def miom(network, solver=Solvers.COIN_OR_CBC):
+    """
+    Create a MIOM optimization model for a given solver.
+    If the solver is Coin-OR CBC, an instance of PythonMipModel is used
+    (which uses the Python-MIP lib as the backend). Otherwise, a PicosModel
+    is created (which uses PICOS as the backend).
+
+    Example:
+        Example of how to perform FBA to maximize flux through the
+        BIOMASS_reaction in the iMM1865 model:
+
+        ```python
+        >>> from miom import miom, load_gem
+        >>> network = load_gem("https://github.com/pablormier/miom-gems/raw/main/gems/mus_musculus_iMM1865.miom")
+        >>> V, _ = miom(network)
+                    .steady_state()
+                    .set_rxn_objective("BIOMASS_reaction")
+                    .solve(verbosity=1)
+                    .get_values())
+        ```
+
+    Args:
+        network (miom_network): A miom metabolic network. A metabolic network
+            can be imported with the [load_gem][miom.mio.load_gem] function.
+        solver (Solver, optional): The solver to be used. Defaults to Solver.GLPK.
+
+    Returns:
+        BaseModel: A BaseModel object, which can be PythonMipModel if CBC solver is
+            used, or a PicosModel otherwise.
+    """
+    solver = str(solver.value) if isinstance(solver, Enum) else str(solver)
+    if solver == 'cbc':
+        return PythonMipModel(miom_network=network, solver_name=solver)
+    if solver == 'gurobi_pymip':
+        return PythonMipModel(miom_network=network, solver_name='gurobi')
+    else:
+        return PicosModel(miom_network=network, solver_name=solver)
+
+class _Variables(ABC):
+    def __init__(self, flux_vars=None, indicator_vars=None, assigned_reactions=None):
+        self._flux_vars = flux_vars
+        self._indicator_vars = indicator_vars
+        self._assigned_reactions = assigned_reactions
+
+    @property
+    def indicators(self):
+        return self._indicator_vars
+
+    @property
+    def fluxes(self):
+        return self._flux_vars
+
+    @property
+    @abstractmethod
+    def flux_values(self):
+        pass
+
+    @property
+    @abstractmethod
+    def indicator_values(self):
+        pass
+
+    @property
+    def assigned_reactions(self):
+        return self._assigned_reactions
+
+    def values(self):
+        return self.flux_values, self.indicator_values
+
+
+class _PicosVariables(_Variables):
+    def __init__(self):
+        super().__init__()
+
+    @property
+    def flux_values(self):
+        if self.fluxes is None:
+            return None
+        arr = np.array(self.fluxes.value)
+        if len(arr) == 1:
+            return arr[0]
+        return arr
+
+    @property
+    def indicator_values(self):
+        if self.indicators is None:
+            return None
+        arr = np.array(self.indicators.value)
+        if len(arr) == 1:
+            return arr[0]
+        return arr
+
+
+class _PythonMipVariables(_Variables):
+    def __init__(self):
+        super().__init__()
+
+    @property
+    def flux_values(self):
+        if self.fluxes is not None:
+            return np.array([v.x for v in self.fluxes])
+        return None
+
+    @property
+    def indicator_values(self):
+        if self.indicators is not None:
+            return np.array([v.x for v in self.indicators])
+        return None
+
+
+def _autochain(fn):
+    """Annotation for methods that return the instance itself to enable chaining.
+
+    If a method `my_method` is annotated with @_autochain, a method called `_my_method`
+    is expected to be provided by a subclass. Parent method `my_method` is called first
+    and the result is passed to the child method `_my_method`.
+
+    """
+    @wraps(fn)
+    def wrapper(self, *args, **kwargs):
+        # Invoke first the original method
+        result = fn(self, *args, **kwargs)
+        # If the result is a dict, update the kwargs
+        if isinstance(result, dict):
+            kwargs.update(result)
+        else:
+            kwargs['_parent_result'] = result
+        if result is False:
+            return self
+        # Find subclass implementation
+        fname = '_' + fn.__name__
+        if not hasattr(self, fname):
+            raise ValueError(f'Method "{fn.__name__}()" is marked as @fluent '
+                             f'but the expected implementation "{fname}()" was not provided '
+                             f'by {self.__class__.__name__}')
+        func = getattr(self, fname)
+        result = func(*args, **kwargs)
+        if isinstance(result, BaseModel):
+            return result
+        return self
+
+    return wrapper
+
+
+def _weighted_rxns(R, weights=None):
+    rxn_data = []
+    for i, rxn in enumerate(R):
+        id, lb, ub = rxn['id'], rxn['lb'], rxn['ub']
+        w = weights[i] if weights is not None else 0
+        if w > 0 and ub > 0:
+            rxn_data.append(_RxnVar(i, id, lb, ub, w, _ReactionType.RH_POS))
+        if w > 0 > lb:
+            rxn_data.append(_RxnVar(i, id, lb, ub, w, _ReactionType.RH_NEG))
+        if w < 0 < abs(lb) + abs(ub):
+            rxn_data.append(_RxnVar(i, id, lb, ub, w, _ReactionType.RL))
+    return rxn_data
+
+
+class BaseModel(ABC):
+    """Base class for building LP/MIP metabolic models.
+    
+    It implements the chainable methods to set-up a LP/MIP 
+    metabolic network problem.
+
+    Two implementations are available: PicosModel and PythonMipModel. 
+    The PicosModel uses the [PICOS library](https://picos-api.gitlab.io/picos/) 
+    as a backend to interact with different solvers. The PythonMipModel uses 
+    the [Python-MIP](https://www.python-mip.com/) library to solve the
+    model using the CBC or GUROBI solvers.
+    
+    !!! note
+        Do not try to instantiate this class directly. Use the [miom()][miom.miom.miom] 
+        function instead. The method automatically selects the right implementation 
+        depending on the solver.
+        
+    """
+    def __init__(self, previous_step_model=None, miom_network=None, solver_name=None):
+        self.previous_step_model = previous_step_model
+        self.network = miom_network
+        self.variables = None
+        self.objective = None
+        if previous_step_model is not None:
+            self._options = previous_step_model._options
+            if miom_network is None:
+                self.network = previous_step_model.network
+            if solver_name is not None:
+                self._options["solver"] = solver_name
+        else:
+            # Default recommended options
+            self._options = {
+                'int_tol': 1e-8,
+                'feas_tol': 1e-8,
+                'opt_tol': 1e-5,
+                'verbosity': 0,
+                'solver': solver_name
+            }
+        self.problem = self.initialize_problem()
+        self.setup(**self._options)
+
+    @abstractmethod
+    def initialize_problem(self):
+        pass
+
+    @_autochain
+    def setup(self, **kwargs):
+        """Provide the options for the solver
+
+        Returns:
+            [type]: [description]
+        """
+        if self.problem is None:
+            warnings.warn("Problem cannot be configured since it was not initialized")
+            return False
+        options = dict()
+        int_tol = kwargs["int_tol"] if "int_tol" in kwargs else None
+        feas_tol = kwargs["feas_tol"] if "feas_tol" in kwargs else None
+        opt_tol = kwargs["opt_tol"] if "opt_tol" in kwargs else None
+        verbosity = kwargs["verbosity"] if "verbosity" in kwargs else None
+        solver = kwargs["solver"] if "solver" in kwargs else None
+        if int_tol is not None:
+            options["int_tol"] = int_tol
+        if feas_tol is not None:
+            options["feas_tol"] = feas_tol
+        if opt_tol is not None:
+            options["opt_tol"] = opt_tol
+        if verbosity is not None:
+            options["verbosity"] = verbosity
+        if solver is not None:
+            options["solver"] = solver
+        self._options.update(options)
+        # Calculate a min eps value to avoid numerical issues
+        self._options["_min_eps"] = np.sqrt(2*self._options["int_tol"])
+        return self._options
+
+    @_autochain
+    def steady_state(self):
+        pass
+
+    @_autochain
+    def keep(self, reactions):
+        if self.variables.indicators is None:
+            raise ValueError("No indicator variables for reactions, "
+                             "transform it to a subset selection problem calling "
+                             "subset_selection first, providing positive weights for the "
+                             "reactions you want to keep.")
+        if reactions is None or len(reactions) == 0:
+            return False
+        if isinstance(reactions, str):
+            reactions = [reactions]
+        # Check if the reactions have an indicator variable
+        reactions = set(self.network.find_reaction(rxn)[0] for rxn in reactions)
+        available = set(rxn.index for rxn in self.variables.assigned_reactions if rxn.cost > 0)
+        diff = reactions - available
+        if len(diff) != 0:
+            raise ValueError(f"Only reactions associated with positive weights "
+                             f"can be forced to be selected. The following reaction "
+                             f"indexes have no indicator variables or are associated with "
+                             f"negative weights: {diff}.")
+        valid_rxn_idx = reactions & available
+        # Get the indexes of the indicator variables
+        idxs = [i for i, r in enumerate(self.variables.assigned_reactions)
+                if r.index in valid_rxn_idx]
+        return dict(idxs=idxs, valid_rxn_idx=valid_rxn_idx)
+
+    @_autochain
+    def subset_selection(self, rxn_weights, eps=1e-2):
+        """Transform the current model into a subset selection problem.
+
+        The subset selection problem consists of selecting the positive weighted
+        reactions and remove the negative weighted reactions, subject to steady
+        state constraints and/or additional constraints on fluxes, and maximizing
+        the weighted sum of the (absolute) weights for the successfully selected reactions
+        (with positive weights) and the successfully removed reactions (with negative
+        weights)
+
+        Each reaction is associated with a weight (positive or negative) provided
+        in the parameter `rxn_weights`, and the objective is to select the reactions 
+        that optimizes the following expression:
+
+        $$
+        f(x) = \sum_i^n |w_i| * x_i
+        $$
+
+        where $x_i$ are the indicator variables for the reactions $i$ and $w_i$ are
+        the weights for the reactions associated to the indicator variable. Indicator
+        variables are automatically created for each reaction associated to a non-zero
+        weight. Two (mutually exclusive) indicator variables are used for positive weighted reactions 
+        that are reversible to indicate whether there is positive or negative flux 
+        through the reaction. A single indicator variable is created for positive weighted
+        non-reversible reactions, to indicate if the reaction is selected (has a non-zero flux)
+        in which case the indicator variable is 1, or 0 otherwise. 
+        
+        A single binary indicator variable is also created for negative weighted reactions, 
+        indicating whether the reaction was not selected (i.e, has 0 flux, in which case the
+        indicator variable is 1) or not (in which case the indicator variable is 0).
+
+        Args:
+            rxn_weights (list): List of weights for each reaction.
+            eps (float, optional): Min absolute flux value for weighted reactions
+                to consider them active or inactive. Defaults to 1e-2.
+
+        Returns:
+            BaseModel: instance of BaseModel with the modifications applied.
+        """
+        # Calculate min valid EPS based on integrality tolerance
+        min_eps = self._options["_min_eps"]
+        if eps < min_eps:
+            warnings.warn(f"The minimum epsilon value is {min_eps}, which is less than {eps}.")
+        eps = max(eps, min_eps)
+        if not isinstance(rxn_weights, Iterable):
+            rxn_weights = [rxn_weights] * self.network.num_reactions
+        rxnw = _weighted_rxns(self.network.R, rxn_weights)
+        if self.variables.indicators is None:
+            self.variables._assigned_reactions = rxnw
+            return dict(eps=eps)
+        else:
+            warnings.warn("Indicator variables were already assigned")
+            return False
+
+    @_autochain
+    def set_flux_bounds(self, rxn_id, min_flux=None, max_flux=None):
+        i, _ = self.network.find_reaction(rxn_id)
+        return i
+
+    @_autochain
+    def add_constraints(self, constraints):
+        for c in constraints:
+            self.add_constraint(c)
+        return len(constraints) > 0
+
+    @_autochain
+    def add_constraint(self, constraint):
+        pass
+
+    @_autochain
+    def set_objective(self, cost_vector, variables, direction='max'):
+        if self.objective is not None:
+            warnings.warn("Previous objective changed")
+        self.objective = (cost_vector, variables, direction)
+
+    def set_rxn_objective(self, rxn, direction='max'):
+        i, _ = self.network.find_reaction(rxn)
+        cost = np.zeros((1, self.network.R.shape[0]))
+        cost[0, i] = 1
+        self.set_objective(cost, self.variables.fluxes, direction=direction)
+        return self
+
+    def set_fluxes_for(self, reactions, tolerance=1e-6):
+        i, r = self.network.find_reaction(reactions)
+        lb = max(r['lb'], self.variables.flux_values[i] - tolerance)
+        ub = min(r['ub'], self.variables.flux_values[i] + tolerance)
+        self.add_constraint(self.variables.fluxes[i] >= lb)
+        self.add_constraint(self.variables.fluxes[i] <= ub)
+        return self
+
+    @_autochain
+    def reset(self):
+        if self.problem is None:
+            warnings.warn("Problem is not initialized, nothing to reset")
+            return False
+        else:
+            return True
+
+    def obtain_subnetwork(
+            self,
+            extraction_mode=ExtractionMode.ABSOLUTE_FLUX_VALUE,
+            comparator=Comparator.GREATER_OR_EQUAL,
+            value=1e-6
+    ):
+        # If indicators are present and assigned,
+        # take the subset of the network for which
+        # the indicators of positive weighted reactions
+        # are equal to 1
+        if extraction_mode == ExtractionMode.ABSOLUTE_FLUX_VALUE:
+            variables = self.variables.flux_values
+            if variables is None:
+                raise ValueError("The model does not contain flux variables. "
+                                 "You need to call first steady_state() to add "
+                                 "the flux variables")
+        elif extraction_mode == ExtractionMode.INDICATOR_VALUE:
+            variables = self.variables.indicator_values
+            if variables is None:
+                raise ValueError("The model does not contain indicator variables. "
+                                 "You need to transform it to a subset selection problem "
+                                 "by invoking subset_selection() first.")
+        else:
+            raise ValueError("Invalid extraction mode")
+
+        if comparator == Comparator.GREATER_OR_EQUAL:
+            selected = np.where(np.abs(variables) >= value)[0]
+        elif comparator == Comparator.LESS_OR_EQUAL:
+            selected = np.where(np.abs(variables) <= value)[0]
+        else:
+            raise ValueError("Invalid comparison")
+        # TODO: Assigned reactions work only for indicator variables
+        if extraction_mode == ExtractionMode.INDICATOR_VALUE:
+            rxns = [self.variables.assigned_reactions[x] for x in selected]
+            selected_idx = [rxn.index for rxn in rxns]
+        else:
+            selected_idx = selected
+        S_sub = self.network.S[:, selected_idx]
+        R_sub = self.network.R[selected_idx]
+        act_met = np.sum(np.abs(S_sub), axis=1) > 0
+        M_sub = self.network.M[act_met]
+        S_sub = S_sub[act_met, :]
+        return MiomNetwork(S_sub, R_sub, M_sub)
+
+    @_autochain
+    def select_subnetwork(
+            self,
+            mode=ExtractionMode.ABSOLUTE_FLUX_VALUE,
+            comparator=Comparator.GREATER_OR_EQUAL,
+            value=1e-6
+    ):
+        """Select a subnetwork and create a new BaseModel to operate on it.
+
+        Args:
+            mode ([type], optional): [description]. Defaults to ExtractionMode.ABSOLUTE_FLUX_VALUE.
+            comparator ([type], optional): [description]. Defaults to Comparator.GREATER_OR_EQUAL.
+            value ([type], optional): [description]. Defaults to 1e-6.
+
+        Returns:
+            [type]: [description]
+        """
+        return self.obtain_subnetwork(extraction_mode=mode,
+                                      comparator=comparator,
+                                      value=value)
+
+    def get_values(self):
+        return self.variables.values()
+
+    def get_fluxes(self, reactions=None):
+        if isinstance(reactions, str):
+            return self.variables.flux_values[self.network.get_reaction_id(reactions)]
+        if isinstance(reactions, Iterable):
+            return {
+                r['id']: self.variables.flux_values[self.network.get_reaction_id(r['id'])]
+                for r in reactions
+            }
+        if reactions is None:
+            return self.variables.flux_values
+        else:
+            raise ValueError("reactions should be an iterable of strings or a single string")
+
+    @_autochain
+    def solve(self, verbosity=None, max_seconds=None):
+        pass
+
+    @_autochain
+    def copy(self):
+        pass
+
+
+class PicosModel(BaseModel):
+    def __init__(self, previous_step_model=None, miom_network=None, solver_name=None):
+        super().__init__(previous_step_model=previous_step_model,
+                         miom_network=miom_network,
+                         solver_name=solver_name)
+        self.variables = _PicosVariables()
+
+    def initialize_problem(self):
+        return pc.Problem()
+
+    def _setup(self, *args, **kwargs):
+        self.problem.options["verbosity"] = kwargs["verbosity"] if "verbosity" in kwargs else self._options["verbosity"]
+        self.problem.options["rel_bnb_opt_tol"] = kwargs["opt_tol"] if "opt_tol" in kwargs else self._options["opt_tol"]
+        self.problem.options["integrality_tol"] = kwargs["int_tol"] if "int_tol" in kwargs else self._options["int_tol"]
+        self.problem.options["abs_prim_fsb_tol"] = kwargs["feas_tol"] if "feas_tol" in kwargs else self._options["feas_tol"]
+        self.problem.options["abs_dual_fsb_tol"] = self.problem.options["abs_prim_fsb_tol"]
+        self.problem.options["solver"] = kwargs["solver"] if "solver" in kwargs else self._options["solver"]
+        return True
+
+    def _reset(self, **kwargs):
+        self.problem.reset()
+        return True
+
+    def _keep(self, *args, **kwargs):
+        idx = kwargs["idxs"]
+        valid_rxn_idx = kwargs["valid_rxn_idx"]
+        n = len(valid_rxn_idx)
+        C = pc.Constant("C", value=[1] * len(idx))
+        # The sum should be equal to the number of different reactions
+        self.add_constraint(C.T * self.variables.indicators[idx] >= n)
+
+    def _set_flux_bounds(self, *args, **kwargs):
+        i = kwargs["_parent_result"]
+        min_flux = kwargs["min_flux"] if "min_flux" in kwargs else None
+        max_flux = kwargs["max_flux"] if "max_flux" in kwargs else None
+        if min_flux is not None:
+            self.variables.fluxes._lower[i] = min_flux
+        if max_flux is not None:
+            self.variables.fluxes._upper[i] = max_flux
+
+    def _subset_selection(self, *args, **kwargs):
+        # Convert to a weighted subset selection problem
+        eps = kwargs["eps"]
+        weighted_rxns = self.variables.assigned_reactions
+        P = self.problem
+        # Build the MIP problem
+        V = self.variables.fluxes
+        X = pc.BinaryVariable("X", shape=(len(weighted_rxns), 1))
+        C = pc.Constant("C", value=np.array([abs(rxn.cost) for rxn in weighted_rxns]))
+        for i, rd in enumerate(weighted_rxns):
+            if rd.type is _ReactionType.RH_POS:
+                P.add_constraint(V[rd.index] >= X[i] * (eps - rd.lb) + rd.lb)
+            elif rd.type is _ReactionType.RH_NEG:
+                P.add_constraint(V[rd.index] <= rd.ub - X[i] * (rd.ub + eps))
+            elif rd.type is _ReactionType.RL:
+                P.add_constraint((1 - X[i]) * rd.ub - V[rd.index] >= 0)
+                P.add_constraint((1 - X[i]) * rd.lb - V[rd.index] <= 0)
+            else:
+                raise ValueError("Unknown type of reaction")
+        P.set_objective('max', C.T * X)
+        self.variables._indicator_vars = X
+        return True
+
+    def _solve(self, **kwargs):
+        max_seconds = kwargs["max_seconds"] if "max_seconds" in kwargs else None
+        verbosity = kwargs["verbosity"] if "verbosity" in kwargs else None
+        if max_seconds is not None:
+            self.problem.options["timelimit"] = max_seconds
+        if verbosity is not None:
+            self.problem.options["verbosity"] = verbosity
+        solutions = self.problem.solve()
+        return True
+
+    def _add_constraint(self, constraint, **kwargs):
+        self.problem.add_constraint(constraint)
+
+    def _steady_state(self, **kwargs):
+        S = pc.Constant("S", self.network.S)
+        V = pc.RealVariable("V", (self.network.S.shape[1], 1),
+                            lower=[rxn['lb'] for rxn in self.network.R],
+                            upper=[rxn['ub'] for rxn in self.network.R])
+        self.add_constraint(S * V == 0)
+        self.variables._flux_vars = V
+        return True
+
+    def _set_objective(self, cost_vector, variables, **kwargs):
+        if "direction" in kwargs:
+            direction = kwargs["direction"]
+        else:
+            direction = "max"
+        C = pc.Constant("C", value=cost_vector)
+        self.problem.set_objective(direction, C * variables)
+        return True
+
+    def _select_subnetwork(self, **kwargs):
+        m = kwargs["_parent_result"]
+        return PicosModel(previous_step_model=self, miom_network=m)
+
+    def _copy(self, **kwargs):
+        return PicosModel(previous_step_model=self)
+
+
+class PythonMipModel(BaseModel):
+    def __init__(self, previous_step_model=None, miom_network=None, solver_name=None):
+        super().__init__(previous_step_model=previous_step_model,
+                         miom_network=miom_network,
+                         solver_name=solver_name)
+        self.variables = _PythonMipVariables()
+
+    def initialize_problem(self):
+        solver = self._options["solver"]
+        if solver is None:
+            solver = 'cbc'
+        else:
+            solver = solver.lower()
+        if solver == 'gurobi':
+            mip_solver = mip.GRB
+        elif solver == 'cbc':
+            mip_solver = mip.CBC
+        else:
+            raise ValueError("Only gurobi and cbc are supported with Python-MIP")
+        return mip.Model("model", solver_name=mip_solver)
+
+    def _setup(self, *args, **kwargs):
+        self.problem.max_mip_gap = kwargs["opt_tol"] if "opt_tol" in kwargs else self._options["opt_tol"]
+        self.problem.max_gap = self.problem.max_mip_gap
+        self.problem.infeas_tol = kwargs["feas_tol"] if "feas_tol" in kwargs else self._options["feas_tol"]
+        self.problem.opt_tol = self.problem.infeas_tol
+        self.problem.integer_tol = kwargs["int_tol"] if "int_tol" in kwargs else self._options["int_tol"]
+        self.problem.verbose = kwargs["verbosity"] if "verbosity" in kwargs else self._options["verbosity"]
+        return True
+
+    def _reset(self, **kwargs):
+        self.proble.clear()
+        return True
+
+    def _keep(self, *args, **kwargs):
+        idx = kwargs["idxs"]
+        valid_rxn_idx = kwargs["valid_rxn_idx"]
+        n = len(valid_rxn_idx)
+        variables = [self.variables.indicators[i] for i in idx]
+        # The sum should be equal to the number of different reactions
+        # Note that if a reaction is blocked and in the core, the 
+        # resulting problem is infeasible
+        self.add_constraint(
+            mip.xsum((v for v in variables)) >= n
+        )
+        return True 
+        
+    def _set_flux_bounds(self, *args, **kwargs):
+        i = kwargs["_parent_result"]
+        min_flux = kwargs["min_flux"] if "min_flux" in kwargs else None
+        max_flux = kwargs["max_flux"] if "max_flux" in kwargs else None
+        if min_flux is not None:
+            self.variables.fluxes[i].lb = min_flux
+        if max_flux is not None:
+            self.variables.fluxes[i].ub = max_flux
+
+    def _subset_selection(self, rxn_weights, **kwargs):
+        eps = kwargs["eps"]
+        # Convert to a weighted subset selection problem
+        weighted_rxns = self.variables.assigned_reactions
+        P = self.problem
+        # Build the MIP problem
+        V = self.variables.fluxes
+        X = [self.problem.add_var(var_type=mip.BINARY) for _ in weighted_rxns]
+        C = [abs(rxn.cost) for rxn in weighted_rxns]
+        for i, rd in enumerate(weighted_rxns):
+            if rd.type is _ReactionType.RH_POS:
+                self.add_constraint(V[rd.index] >= X[i] * (eps - rd.lb) + rd.lb)
+            elif rd.type is _ReactionType.RH_NEG:
+                self.add_constraint(V[rd.index] <= rd.ub - X[i] * (rd.ub + eps))
+            elif rd.type is _ReactionType.RL:
+                self.add_constraint((1 - X[i]) * rd.ub - V[rd.index] >= 0)
+                self.add_constraint((1 - X[i]) * rd.lb - V[rd.index] <= 0)
+            else:
+                raise ValueError("Unknown type of reaction")
+        P.objective = mip.xsum((c * X[i] for i, c in enumerate(C)))
+        P.sense = mip.MAXIMIZE
+        self.variables._indicator_vars = X
+        return True
+
+    def _solve(self, **kwargs):
+        max_seconds = kwargs["max_seconds"] if "max_seconds" in kwargs else 10 * 60
+        verbosity = kwargs["verbosity"] if "verbosity" in kwargs else None
+        if verbosity is not None:
+            self.setup(verbosity=verbosity)
+        solutions = self.problem.optimize(max_seconds=max_seconds)
+        return True
+
+    def _add_constraint(self, constraint, **kwargs):
+        self.problem += constraint
+
+    def _steady_state(self, **kwargs):
+        V = [self.problem.add_var(lb=rxn['lb'], ub=rxn['ub']) for rxn in self.network.R]
+        # (Python-MIP does not allow matrix operations like CyLP or PICOS)
+        for i in range(self.network.S.shape[0]):
+            self.problem += mip.xsum(self.network.S[i, j] * V[j]
+                                     for j in range(self.network.R.shape[0]) if self.network.S[i, j] != 0) == 0
+        self.variables._flux_vars = V
+        return True
+
+    def _set_objective(self, cost_vector, variables, **kwargs):
+        if "direction" in kwargs:
+            direction = kwargs["direction"]
+        else:
+            direction = "max"
+        if direction == "max":
+            self.problem.sense = mip.MAXIMIZE
+        else:
+            self.problem.sense = mip.MINIMIZE
+        self.problem.objective = (
+            mip.xsum(
+                (float(cost_vector[:, i]) * variables[i] for i in range(len(variables)))
+            ) 
+        )      
+        return True
+
+    def _select_subnetwork(self, **kwargs):
+        return PythonMipModel(previous_step_model=self, miom_network=kwargs["_parent_result"])
+
+    def _copy(self, **kwargs):
+        return PythonMipModel(previous_step_model=self)
+
