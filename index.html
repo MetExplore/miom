@@ -10,7 +10,7 @@
       
       
       <link rel="icon" href="assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.0">
+      <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.1">
     
     
       
@@ -18,7 +18,7 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.fe914879.min.css">
+      <link rel="stylesheet" href="assets/stylesheets/main.1118c9be.min.css">
       
         
         <link rel="stylesheet" href="assets/stylesheets/palette.ba0d045b.min.css">
@@ -208,6 +208,13 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#a-quick-example" class="md-nav__link">
@@ -403,6 +410,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#a-quick-example" class="md-nav__link">
     A quick example
   </a>
@@ -452,6 +466,14 @@
 <p class="admonition-title">Warning</p>
 <p>This library is functional but still in a very early stage. API is still not stable and might be changed in future versions.</p>
 </div>
+<h2 id="installation">Installation</h2>
+<p>By default, MIOM comes with support for COIN-OR CBC solver and GLPK using the swiglpk wrapper. To install MIOM with minimal dependencies, run:</p>
+<div class="highlight"><pre><span></span><code>pip install miom
+</code></pre></div>
+<p>You can also install it with the following command to include the interfaces for <a href="https://www.gurobi.com/downloads">Gurobi</a> and <a href="https://www.mosek.com/downloads/">Mosek</a>:</p>
+<div class="highlight"><pre><span></span><code>pip install miom[all]
+</code></pre></div>
+<p>CPLEX is also supported, but requires a license. To install MIOM with CPLEX support, follow the instructions on the <a href="https://www.ibm.com/docs/en/icos/12.8.0.0?topic=cplex-setting-up-python-api">CPLEX page</a>.</p>
 <h2 id="a-quick-example">A quick example</h2>
 <p>Here is an example of how to load a metabolic network and maximize the flux through a target reaction using FBA, and then how to modify the original problem to implement the sparse FBA problem adding only a few lines to the original problem:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">miom</span> <span class="kn">import</span> <span class="n">miom</span><span class="p">,</span> <span class="n">load_gem</span><span class="p">,</span> <span class="n">Solvers</span>
@@ -474,7 +496,7 @@
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Number of reactions with non-zero flux:&quot;</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">V</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-8</span><span class="p">))</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Optimal flux: 798.8110517749975 mmol/(h·gDW)
-Number of reactions with non-flux: 2549
+Number of active reactions: 2549
 </code></pre></div>
 <p>Now, modify the original problem to solve the sparse FBA problem, minimizing the number of reactions with non-zero flux that can lead to the optimal possible flux through the target reaction. This can be easily done by transforming the FBA problem into a subset selection problem, where each reaction has a negative weight and the goal is to remove as many negative weighted reactions as possible. Note that since each reaction has the same weight (-1), all reactions are equally important in the optimization problem:</p>
 <div class="admonition note">
