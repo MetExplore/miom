@@ -44,12 +44,15 @@ from miom import miom, load_gem, Solvers
 # $ pip install cobra scipy
 network = load_gem("https://github.com/pablormier/miom-gems/raw/main/gems/mus_musculus_iMM1865.miom")
 target_rxn = "BIOMASS_reaction"
+
 # Create the optimization problem with miom and solve
 model = (miom(network)
         .steady_state()
         .set_rxn_objective(target_rxn)
         .solve(verbosity=1))
+
 print("Optimal flux:", model.get_fluxes(target_rxn), "mmol/(h·gDW)")
+
 # Show reactions with non-zero flux
 V, _ = model.get_values()
 print("Number of reactions active reactions:", sum(abs(V) > 1e-8))
@@ -81,6 +84,7 @@ V, X = (model
         .solve()
         # Get continuos vars (fluxes) and binary vars
         .get_values())
+
 # Show reactions with non-zero flux
 print("Number of active reactions:", sum(abs(V) > 1e-8))
 ```
@@ -107,7 +111,7 @@ approximate solution, controlled by the `opt_tol` parameter.
 To use other solvers, you only need to provide the specific solver to the `miom` method, for example:
 
 ```python
-model = (miom(network, solver=Solvers.GUROBI_PYMIP)
+model = (miom(network, solver=Solvers.GLPK)
         .steady_state()
         .set_rxn_objective(target_rxn)
         .solve(verbosity=1))
