@@ -103,7 +103,9 @@ model = (miom(network, solver=Solvers.GUROBI_PYMIP)
 * __It includes a compressed GEM format__: MIOM can load and save the minimal information of the metabolic networks required for performing simulations into a compressed file compatible with numpy. The small size of the files allows you to quickly run online experiments so other people can reproduce your results. It also supports SBML and matlab formats if `cobratoolbox` is installed.
 * __It's open-source:__ MIOM is open-source and free to use. You can contribute to the development of MIOM by forking the repository and sending pull requests.
 
+## Documentation
 
+The documentation of the library can be found at https://metexplore.github.io/miom/
 
 ## How to cite
 
