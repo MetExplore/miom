@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "miom"
-version = "0.9.0-alpha.1"
+version = "0.9.0-alpha.2"
 description = "Mixed Integer Optimization for Metabolism"
 authors = ["Pablo R. Mier <pablo.rodriguez.mier@gmail.com>"]
 keywords = ["optimization", "LP", "MIP", "metabolism", "metabolic-networks"]
@@ -8,18 +8,17 @@ license = "GPLv3"
 readme = "README.md"
 repository = "https://github.com/MetExplore/miom/"
 homepage = "https://github.com/MetExplore/miom/"
-include = [
-	"LICENSE"
-]
+include = ["LICENSE"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
-numpy = "^1.21.1"
+python = "^3.6"
+numpy = "^1.19.2"
 mip = "^1.13.0"
 PICOS = "^2.2.52"
-gurobipy = "^9.1.2"
 swiglpk = "^5.0.3"
-Mosek = "^9.2.49"
+
+[tool.poetry.extras]
+all = ["gurobipy", "Mosek"]
 
 [tool.poetry.dev-dependencies]
 mkdocs-material = "^7.2.1"

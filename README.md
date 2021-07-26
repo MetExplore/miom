@@ -12,6 +12,23 @@ MIOM uses the [PICOS](https://picos-api.gitlab.io/picos/) and the [Python-MIP](h
 
 > NOTE: This library is functional but still in a very early stage. API is still not stable and might be changed in future versions.
 
+## Installation
+
+By default, MIOM comes with support for COIN-OR CBC solver and GLPK using the swiglpk wrapper. To install MIOM with minimal dependencies, run:
+
+```
+pip install miom
+```
+
+You can also install it with the following command to include the interfaces for [Gurobi](https://www.gurobi.com/downloads) and [Mosek](https://www.mosek.com/downloads/):
+
+```
+pip install miom[all]
+```
+
+CPLEX is also supported, but requires a license. To install MIOM with CPLEX support, follow the instructions on the [CPLEX page](https://www.ibm.com/docs/en/icos/12.8.0.0?topic=cplex-setting-up-python-api).
+
+
 ## A quick example
 
 Here is an example of how to load a metabolic network and maximize the flux through a target reaction using FBA, and then how to modify the original problem to implement the sparse FBA problem adding only a few lines to the original problem:
@@ -34,12 +51,12 @@ model = (miom(network)
 print("Optimal flux:", model.get_fluxes(target_rxn), "mmol/(h·gDW)")
 # Show reactions with non-zero flux
 V, _ = model.get_values()
-print("Number of reactions with non-zero flux:", sum(abs(V) > 1e-8))
+print("Number of reactions active reactions:", sum(abs(V) > 1e-8))
 ```
 
 ```
 Optimal flux: 798.8110517749975 mmol/(h·gDW)
-Number of reactions with non-flux: 2549
+Number of active reactions: 2549
 ```
 
 Now, modify the original problem to solve the sparse FBA problem, minimizing the number of reactions with non-zero flux that can lead to the optimal possible flux through the target reaction. This can be easily done by transforming the FBA problem into a subset selection problem, where each reaction has a negative weight and the goal is to remove as many negative weighted reactions as possible. Note that since each reaction has the same weight (-1), all reactions are equally important in the optimization problem:
@@ -64,11 +81,11 @@ V, X = (model
         # Get continuos vars (fluxes) and binary vars
         .get_values())
 # Show reactions with non-zero flux
-print("Number of reactions with non-zero flux:", sum(abs(V) > 1e-8))
+print("Number of active reactions:", sum(abs(V) > 1e-8))
 ```
 
 ```
-Number of reactions with non-zero flux: 404
+Number of active reactions: 404
 ```
 
 Solving this problem with default COIN-OR CBC solver returns a solution with 404 active reactions (much less than the 2549 reactions obtained with FBA, and less than the 433 reactions returned by the CappedL1 approximation in the [sparseFBA](https://opencobra.github.io/cobratoolbox/stable/modules/analysis/sparseFBA/index.html) implementation in Matlab), with a relative gap between the lower and upper objective bound below 5% (as indicated in the setup method):
