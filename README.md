@@ -1,6 +1,6 @@
 # Introduction
-[![PyPI version](https://badge.fury.io/py/miom.svg)](https://badge.fury.io/py/miom)
 [![Run In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1JAOEHLlRCW8GziIpBqkFwJL2ha3OEOWJ?usp=sharing)
+[![PyPI version](https://badge.fury.io/py/miom.svg)](https://badge.fury.io/py/miom)
 ![Tests](https://github.com/metexplore/miom/actions/workflows/unit-tests.yml/badge.svg)
 
 https://metexplore.github.io/miom
