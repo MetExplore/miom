@@ -67,8 +67,7 @@ Number of active reactions: 2549
 
 Now, modify the original problem to solve the sparse FBA problem, minimizing the number of reactions with non-zero flux that can lead to the optimal possible flux through the target reaction. This can be easily done by transforming the FBA problem into a subset selection problem, where each reaction has a negative weight and the goal is to remove as many negative weighted reactions as possible. Note that since each reaction has the same weight (-1), all reactions are equally important in the optimization problem:
 
-!!! note
-    To better understand the meaning of each step, please read the documentation of the [BaseModel][miom.miom.BaseModel] class, and the complete example in [examples/sparse_fba.py](examples/sparse_fba).    
+> Note: To better understand the meaning of each step, please read the documentation of the [BaseModel class](https://metexplore.github.io/miom/references/miom/#miom.miom.BaseModel), and the complete example in [examples/sparse_fba.py](https://metexplore.github.io/miom/examples/sparse_fba).    
    
 
 ```python
