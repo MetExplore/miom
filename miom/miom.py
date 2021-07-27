@@ -430,7 +430,8 @@ class BaseModel(ABC):
         indicator variable is 1) or not (in which case the indicator variable is 0).
 
         Args:
-            rxn_weights (list): List of weights for each reaction.
+            rxn_weights (list): List of weights for each reaction. If a single value
+                is provided, it is assumed to be the weight for all reactions.
             eps (float, optional): Min absolute flux value for weighted reactions
                 to consider them active or inactive. Defaults to 1e-2.
 
@@ -545,14 +546,22 @@ class BaseModel(ABC):
             self,
             mode=ExtractionMode.ABSOLUTE_FLUX_VALUE,
             comparator=Comparator.GREATER_OR_EQUAL,
-            value=1e-6
+            value=1e-8
     ):
         """Select a subnetwork and create a new BaseModel to operate on it.
 
+        The new instance of the BaseModel is a new problem instance with no constraints.
+        If the idea is to perform FBA simulations on this new subnetwork, remember to add
+        the new constraints, especially the `steady_state`.
+
         Args:
-            mode ([type], optional): [description]. Defaults to ExtractionMode.ABSOLUTE_FLUX_VALUE.
-            comparator ([type], optional): [description]. Defaults to Comparator.GREATER_OR_EQUAL.
-            value ([type], optional): [description]. Defaults to 1e-6.
+            mode (ExtractionMode, optional): Method used to extract the subnetwork 
+                (based on flux values or using the indicator values). 
+                Defaults to ExtractionMode.ABSOLUTE_FLUX_VALUE.
+            comparator (Comparator, optional): Comparator for the selected mode. 
+                Defaults to Comparator.GREATER_OR_EQUAL.
+            value (float, optional): Value threshold for the mode and comparator selected. 
+                Defaults to 1e-8.
 
         Returns:
             [type]: [description]
