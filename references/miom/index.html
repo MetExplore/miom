@@ -602,7 +602,7 @@ depending on the solver.</p>
 
 
 <h3 id="miom.miom.BaseModel.select_subnetwork" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">select_subnetwork</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=&lt;</span><span class="n">ExtractionMode</span><span class="o">.</span><span class="n">ABSOLUTE_FLUX_VALUE</span><span class="p">:</span> <span class="s1">&#39;flux_value&#39;</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">comparator</span><span class="o">=&lt;</span><span class="n">Comparator</span><span class="o">.</span><span class="n">GREATER_OR_EQUAL</span><span class="p">:</span> <span class="s1">&#39;geq&#39;</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">1e-06</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">select_subnetwork</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=&lt;</span><span class="n">ExtractionMode</span><span class="o">.</span><span class="n">ABSOLUTE_FLUX_VALUE</span><span class="p">:</span> <span class="s1">&#39;flux_value&#39;</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">comparator</span><span class="o">=&lt;</span><span class="n">Comparator</span><span class="o">.</span><span class="n">GREATER_OR_EQUAL</span><span class="p">:</span> <span class="s1">&#39;geq&#39;</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">1e-08</span><span class="p">)</span></code>
 
 
 </h3>
@@ -610,6 +610,9 @@ depending on the solver.</p>
     <div class="doc doc-contents ">
 
       <p>Select a subnetwork and create a new BaseModel to operate on it.</p>
+<p>The new instance of the BaseModel is a new problem instance with no constraints.
+If the idea is to perform FBA simulations on this new subnetwork, remember to add
+the new constraints, especially the <code>steady_state</code>.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -624,21 +627,25 @@ depending on the solver.</p>
   <tbody>
       <tr>
         <td><code>mode</code></td>
-        <td><code>[type]</code></td>
-        <td><p>[description]. Defaults to ExtractionMode.ABSOLUTE_FLUX_VALUE.</p></td>
+        <td><code>ExtractionMode</code></td>
+        <td><p>Method used to extract the subnetwork 
+(based on flux values or using the indicator values). 
+Defaults to ExtractionMode.ABSOLUTE_FLUX_VALUE.</p></td>
         <td><code>&lt;ExtractionMode.ABSOLUTE_FLUX_VALUE: &#39;flux_value&#39;&gt;</code></td>
       </tr>
       <tr>
         <td><code>comparator</code></td>
-        <td><code>[type]</code></td>
-        <td><p>[description]. Defaults to Comparator.GREATER_OR_EQUAL.</p></td>
+        <td><code>Comparator</code></td>
+        <td><p>Comparator for the selected mode. 
+Defaults to Comparator.GREATER_OR_EQUAL.</p></td>
         <td><code>&lt;Comparator.GREATER_OR_EQUAL: &#39;geq&#39;&gt;</code></td>
       </tr>
       <tr>
         <td><code>value</code></td>
-        <td><code>[type]</code></td>
-        <td><p>[description]. Defaults to 1e-6.</p></td>
-        <td><code>1e-06</code></td>
+        <td><code>float</code></td>
+        <td><p>Value threshold for the mode and comparator selected. 
+Defaults to 1e-8.</p></td>
+        <td><code>1e-08</code></td>
       </tr>
   </tbody>
 </table>
@@ -664,14 +671,22 @@ depending on the solver.</p>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">mode</span><span class="o">=</span><span class="n">ExtractionMode</span><span class="o">.</span><span class="n">ABSOLUTE_FLUX_VALUE</span><span class="p">,</span>
         <span class="n">comparator</span><span class="o">=</span><span class="n">Comparator</span><span class="o">.</span><span class="n">GREATER_OR_EQUAL</span><span class="p">,</span>
-        <span class="n">value</span><span class="o">=</span><span class="mf">1e-6</span>
+        <span class="n">value</span><span class="o">=</span><span class="mf">1e-8</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Select a subnetwork and create a new BaseModel to operate on it.</span>
 
+<span class="sd">    The new instance of the BaseModel is a new problem instance with no constraints.</span>
+<span class="sd">    If the idea is to perform FBA simulations on this new subnetwork, remember to add</span>
+<span class="sd">    the new constraints, especially the `steady_state`.</span>
+
 <span class="sd">    Args:</span>
-<span class="sd">        mode ([type], optional): [description]. Defaults to ExtractionMode.ABSOLUTE_FLUX_VALUE.</span>
-<span class="sd">        comparator ([type], optional): [description]. Defaults to Comparator.GREATER_OR_EQUAL.</span>
-<span class="sd">        value ([type], optional): [description]. Defaults to 1e-6.</span>
+<span class="sd">        mode (ExtractionMode, optional): Method used to extract the subnetwork </span>
+<span class="sd">            (based on flux values or using the indicator values). </span>
+<span class="sd">            Defaults to ExtractionMode.ABSOLUTE_FLUX_VALUE.</span>
+<span class="sd">        comparator (Comparator, optional): Comparator for the selected mode. </span>
+<span class="sd">            Defaults to Comparator.GREATER_OR_EQUAL.</span>
+<span class="sd">        value (float, optional): Value threshold for the mode and comparator selected. </span>
+<span class="sd">            Defaults to 1e-8.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        [type]: [description]</span>
@@ -813,7 +828,8 @@ indicator variable is 1) or not (in which case the indicator variable is 0).</p>
       <tr>
         <td><code>rxn_weights</code></td>
         <td><code>list</code></td>
-        <td><p>List of weights for each reaction.</p></td>
+        <td><p>List of weights for each reaction. If a single value
+is provided, it is assumed to be the weight for all reactions.</p></td>
         <td><em>required</em></td>
       </tr>
       <tr>
@@ -875,7 +891,8 @@ to consider them active or inactive. Defaults to 1e-2.</p></td>
 <span class="sd">    indicator variable is 1) or not (in which case the indicator variable is 0).</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        rxn_weights (list): List of weights for each reaction.</span>
+<span class="sd">        rxn_weights (list): List of weights for each reaction. If a single value</span>
+<span class="sd">            is provided, it is assumed to be the weight for all reactions.</span>
 <span class="sd">        eps (float, optional): Min absolute flux value for weighted reactions</span>
 <span class="sd">            to consider them active or inactive. Defaults to 1e-2.</span>
 
