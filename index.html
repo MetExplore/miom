@@ -458,6 +458,9 @@
                 
                 
                 <h1 id="introduction">Introduction</h1>
+<p><a href="https://colab.research.google.com/drive/1JAOEHLlRCW8GziIpBqkFwJL2ha3OEOWJ?usp=sharing"><img alt="Run In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a>
+<a href="https://badge.fury.io/py/miom"><img alt="PyPI version" src="https://badge.fury.io/py/miom.svg" /></a>
+<img alt="Tests" src="https://github.com/metexplore/miom/actions/workflows/unit-tests.yml/badge.svg" /></p>
 <p><strong>MIOM</strong> (Mixed Integer Optimization for Metabolism) is a python library for creating and solving complex optimization problems using genome-scale metabolic networks, in just a few lines. </p>
 <p>By leveraging the power of modern Mixed Integer Optimization (MIO) solvers, it can transform any simple constraint-based problem, such as Flux Balance Analysis (FBA) into a more complex optimization problem, such as sparse FBA or context-specific reconstruction problems very easily, and solve it with the <strong>required level of optimality</strong>.</p>
 <p>But what is even better is that most of the time, algorithms formulated as Mixed Integer Optimization problems with MIOM can be solved faster and with better quality than currently existing alternatives that are approximations of the original problem. By using the MIO formulation, you can get also an estimation of how close to optimality a solution is, so you don't need to waste more time than needed.</p>
@@ -470,7 +473,7 @@
 <p>By default, MIOM comes with support for COIN-OR CBC solver and GLPK using the swiglpk wrapper. To install MIOM with minimal dependencies, run:</p>
 <div class="highlight"><pre><span></span><code>pip install miom
 </code></pre></div>
-<p>You can also install it with the following command to include the interfaces for <a href="https://www.gurobi.com/downloads">Gurobi</a> and <a href="https://www.mosek.com/downloads/">Mosek</a>:</p>
+<p>You can also install it with the following command to include the interfaces for <a href="https://www.gurobi.com/downloads">Gurobi</a> and <a href="https://www.mosek.com/downloads/">Mosek</a> (note that you need a valid license for the solvers):</p>
 <div class="highlight"><pre><span></span><code>pip install miom[all]
 </code></pre></div>
 <p>CPLEX is also supported, but requires a license. To install MIOM with CPLEX support, follow the instructions on the <a href="https://www.ibm.com/docs/en/icos/12.8.0.0?topic=cplex-setting-up-python-api">CPLEX page</a>.</p>
@@ -518,11 +521,11 @@ Number of active reactions: 2549
         <span class="c1"># Get continuos vars (fluxes) and binary vars</span>
         <span class="o">.</span><span class="n">get_values</span><span class="p">())</span>
 <span class="c1"># Show reactions with non-zero flux</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Number of reactions with non-zero flux:&quot;</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">V</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-8</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Number of active reactions (with non-zero flux):&quot;</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">V</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-8</span><span class="p">))</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>Number of reactions with non-zero flux: 404
+<div class="highlight"><pre><span></span><code>Number of active reactions (with non-zero flux): 404
 </code></pre></div>
-<p>Solving this problem with default COIN-OR CBC solver returns a solution with 404 active reactions (much less than the 2549 reactions obtained with FBA, and less than the 433 reactions returned by the CappedL1 approximation in the <a href="https://opencobra.github.io/cobratoolbox/stable/modules/analysis/sparseFBA/index.html">sparseFBA</a> implementation in Matlab), with a relative gap between the lower and upper objective bound below 5% (as indicated in the setup method):</p>
+<p>Solving this problem with default COIN-OR CBC solver returns a solution with 404 active reactions (much less than the 2549 reactions obtained with FBA, and less than the 433 reactions returned by the CappedL1 approximation in the <a href="https://opencobra.github.io/cobratoolbox/stable/modules/analysis/sparseFBA/index.html">sparse FBA</a> implementation in Matlab), with a relative gap between the lower and upper objective bound below 5% (as indicated in the setup method):</p>
 <div class="highlight"><pre><span></span><code>Cbc0011I Exiting as integer gap of 122.04538 less than 1e-10 or 5%
 Cbc0001I Search completed - best objective -10208, took 0 iterations and 0 nodes (28.34 seconds)
 Cbc0035I Maximum depth 0, 0 variables fixed on reduced cost
@@ -534,7 +537,7 @@ reaction (in this case the <code>BIOMASS_reaction</code>). Using this formulatio
 modern solvers like CPLEX, GUROBI, MOSEK, COIN-OR CBC (among others) to obtain an optimal or an
 approximate solution, controlled by the <code>opt_tol</code> parameter.</p>
 <p>To use other solvers, you only need to provide the specific solver to the <code>miom</code> method, for example:</p>
-<div class="highlight"><pre><span></span><code><span class="n">model</span> <span class="o">=</span> <span class="p">(</span><span class="n">miom</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">Solvers</span><span class="o">.</span><span class="n">GUROBI_PYMIP</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">model</span> <span class="o">=</span> <span class="p">(</span><span class="n">miom</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">Solvers</span><span class="o">.</span><span class="n">GLPK</span><span class="p">)</span>
         <span class="o">.</span><span class="n">steady_state</span><span class="p">()</span>
         <span class="o">.</span><span class="n">set_rxn_objective</span><span class="p">(</span><span class="n">target_rxn</span><span class="p">)</span>
         <span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">verbosity</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>

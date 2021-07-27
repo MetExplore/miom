@@ -550,7 +550,7 @@
 
 
 
-<h2 class="doc doc-heading" id="miom.miom.BaseModel">
+<h2 id="miom.miom.BaseModel" class="doc doc-heading">
         <code>BaseModel</code>
 
 
@@ -601,7 +601,7 @@ depending on the solver.</p>
 
 
 
-<h3 class="doc doc-heading" id="miom.miom.BaseModel.select_subnetwork">
+<h3 id="miom.miom.BaseModel.select_subnetwork" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">select_subnetwork</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=&lt;</span><span class="n">ExtractionMode</span><span class="o">.</span><span class="n">ABSOLUTE_FLUX_VALUE</span><span class="p">:</span> <span class="s1">&#39;flux_value&#39;</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">comparator</span><span class="o">=&lt;</span><span class="n">Comparator</span><span class="o">.</span><span class="n">GREATER_OR_EQUAL</span><span class="p">:</span> <span class="s1">&#39;geq&#39;</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">1e-06</span><span class="p">)</span></code>
 
 
@@ -658,7 +658,7 @@ depending on the solver.</p>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>miom\miom.py</code></summary>
+          <summary>Source code in <code>miom/miom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="nd">@_autochain</span>
 <span class="k">def</span> <span class="nf">select_subnetwork</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -695,7 +695,7 @@ depending on the solver.</p>
 
 
 
-<h3 class="doc doc-heading" id="miom.miom.BaseModel.setup">
+<h3 id="miom.miom.BaseModel.setup" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 
@@ -721,7 +721,7 @@ depending on the solver.</p>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>miom\miom.py</code></summary>
+          <summary>Source code in <code>miom/miom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="nd">@_autochain</span>
 <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Provide the options for the solver</span>
@@ -766,7 +766,7 @@ depending on the solver.</p>
 
 
 
-<h3 class="doc doc-heading" id="miom.miom.BaseModel.subset_selection">
+<h3 id="miom.miom.BaseModel.subset_selection" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">subset_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rxn_weights</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span></code>
 
 
@@ -841,7 +841,7 @@ to consider them active or inactive. Defaults to 1e-2.</p></td>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>miom\miom.py</code></summary>
+          <summary>Source code in <code>miom/miom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="nd">@_autochain</span>
 <span class="k">def</span> <span class="nf">subset_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rxn_weights</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Transform the current model into a subset selection problem.</span>
@@ -918,7 +918,7 @@ to consider them active or inactive. Defaults to 1e-2.</p></td>
 
 
 
-<h2 class="doc doc-heading" id="miom.miom.Comparator">
+<h2 id="miom.miom.Comparator" class="doc doc-heading">
         <code>Comparator</code>
 
 
@@ -982,7 +982,7 @@ with a value less or equal than the one provided.</p></td>
 
 
 
-<h2 class="doc doc-heading" id="miom.miom.ExtractionMode">
+<h2 id="miom.miom.ExtractionMode" class="doc doc-heading">
         <code>ExtractionMode</code>
 
 
@@ -1092,7 +1092,7 @@ variables with a value of 0.</p>
 
 
 
-<h2 class="doc doc-heading" id="miom.miom.Solvers">
+<h2 id="miom.miom.Solvers" class="doc doc-heading">
         <code>Solvers</code>
 
 
@@ -1195,7 +1195,7 @@ supported by the PICOS backend.</p></td>
 
 
 
-<h2 class="doc doc-heading" id="miom.miom.miom">
+<h2 id="miom.miom.miom" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">miom</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">solver</span><span class="o">=&lt;</span><span class="n">Solvers</span><span class="o">.</span><span class="n">COIN_OR_CBC</span><span class="p">:</span> <span class="s1">&#39;cbc&#39;</span><span class="o">&gt;</span><span class="p">)</span></code>
 
 
@@ -1263,7 +1263,7 @@ can be imported with the <a href="../mio/#miom.mio.load_gem">load_gem</a> functi
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>miom\miom.py</code></summary>
+          <summary>Source code in <code>miom/miom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">miom</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">Solvers</span><span class="o">.</span><span class="n">COIN_OR_CBC</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a MIOM optimization model for a given solver.</span>
