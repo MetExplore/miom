@@ -11,7 +11,7 @@ By leveraging the power of modern Mixed Integer Optimization (MIO) solvers, it c
 
 But what is even better is that most of the time, algorithms formulated as Mixed Integer Optimization problems with MIOM can be solved faster and with better quality than currently existing alternatives that are approximations of the original problem. By using the MIO formulation, you can get also an estimation of how close to optimality a solution is, so you don't need to waste more time than needed.
 
-MIOM uses the [PICOS](https://picos-api.gitlab.io/picos/) and the [Python-MIP](https://www.python-mip.com/) libraries to build and solve the optimization problems using many commercial, academic and free solvers.
+MIOM uses the [PICOS](https://picos-api.gitlab.io/picos/) and the [Python-MIP](https://www.python-mip.com/) libraries to build and solve the optimization problems using many commercial, academic and free solvers. It is also compatible and complementary to [cobrapy](https://opencobra.github.io/cobrapy/).
 
 > NOTE: This library is functional but still in a very early stage. API is still not stable and might be changed in future versions.
 
