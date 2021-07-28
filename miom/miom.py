@@ -292,13 +292,13 @@ def _weighted_rxns(R, weights=None):
 
 
 class BaseModel(ABC):
-    """Base class for building LP/MIP metabolic models.
+    """Base class for building LP/MIP metabolic models
+    using a high-level API for metabolic problems.
     
     It implements the chainable methods to set-up a LP/MIP 
-    metabolic network problem.
-
-    Two implementations are available: PicosModel and PythonMipModel. 
-    The PicosModel uses the [PICOS library](https://picos-api.gitlab.io/picos/) 
+    metabolic network problem. Two implementations are available: 
+    PicosModel and PythonMipModel. The PicosModel uses the 
+    [PICOS library](https://picos-api.gitlab.io/picos/) 
     as a backend to interact with different solvers. The PythonMipModel uses 
     the [Python-MIP](https://www.python-mip.com/) library to solve the
     model using the CBC or GUROBI solvers.

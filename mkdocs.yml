@@ -1,4 +1,10 @@
 site_name: MIOM
+site_description: Mixed Integer Optimization for Metabolism
+site_author: Pablo Rodriguez-Mier
+site_url: https://metexplore.github.io/miom
+repo_name: miom
+repo_url: https://www.github.com/metexplore/miom
+copyright: Copyright &copy; 2021 INRAE Toxalim
 theme:
     name: material
     custom_dir: docs/overrides
