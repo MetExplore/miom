@@ -338,10 +338,20 @@ class BaseModel(ABC):
 
     @_autochain
     def setup(self, **kwargs):
-        """Provide the options for the solver
+        """Provide the options for the solver.
+
+        Attributes:
+            int_tol (float): Integrality tolerance for integer variables.
+                Defaults to 1e-8.
+            feas_tol (float): Feasibility tolerance. Defaults to 1e-8.
+            opt_tol (float): Relative MIP gap tolerance for MIP problems.
+                Defaults to 1e-5.
+            verbosity (int): Values above 0 force the backends to be verbose.
+                Use a value of 1 to show useful information about the search.
+                Defaults to 0.
 
         Returns:
-            [type]: [description]
+            BaseModel: the configured instance of the BaseModel
         """
         if self.problem is None:
             warnings.warn("Problem cannot be configured since it was not initialized")
