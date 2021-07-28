@@ -750,8 +750,44 @@ Defaults to 1e-8.</p></td>
 
     <div class="doc doc-contents ">
 
-      <p>Provide the options for the solver</p>
+      <p>Provide the options for the solver.</p>
 
+<p><strong>Attributes:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>int_tol</code></td>
+        <td><code>float</code></td>
+        <td><p>Integrality tolerance for integer variables.
+Defaults to 1e-8.</p></td>
+      </tr>
+      <tr>
+        <td><code>feas_tol</code></td>
+        <td><code>float</code></td>
+        <td><p>Feasibility tolerance. Defaults to 1e-8.</p></td>
+      </tr>
+      <tr>
+        <td><code>opt_tol</code></td>
+        <td><code>float</code></td>
+        <td><p>Relative MIP gap tolerance for MIP problems.
+Defaults to 1e-5.</p></td>
+      </tr>
+      <tr>
+        <td><code>verbosity</code></td>
+        <td><code>int</code></td>
+        <td><p>Values above 0 force the backends to be verbose.
+Use a value of 1 to show useful information about the search.
+Defaults to 0.</p></td>
+      </tr>
+  </tbody>
+</table>
 <p><strong>Returns:</strong></p>
 <table>
   <thead>
@@ -762,8 +798,8 @@ Defaults to 1e-8.</p></td>
   </thead>
   <tbody>
     <tr>
-      <td><code>[type]</code></td>
-      <td><p>[description]</p></td>
+      <td><code>BaseModel</code></td>
+      <td><p>the configured instance of the BaseModel</p></td>
     </tr>
   </tbody>
 </table>
@@ -771,10 +807,20 @@ Defaults to 1e-8.</p></td>
           <summary>Source code in <code>miom/miom.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="nd">@_autochain</span>
 <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Provide the options for the solver</span>
+    <span class="sd">&quot;&quot;&quot;Provide the options for the solver.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        int_tol (float): Integrality tolerance for integer variables.</span>
+<span class="sd">            Defaults to 1e-8.</span>
+<span class="sd">        feas_tol (float): Feasibility tolerance. Defaults to 1e-8.</span>
+<span class="sd">        opt_tol (float): Relative MIP gap tolerance for MIP problems.</span>
+<span class="sd">            Defaults to 1e-5.</span>
+<span class="sd">        verbosity (int): Values above 0 force the backends to be verbose.</span>
+<span class="sd">            Use a value of 1 to show useful information about the search.</span>
+<span class="sd">            Defaults to 0.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        [type]: [description]</span>
+<span class="sd">        BaseModel: the configured instance of the BaseModel</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Problem cannot be configured since it was not initialized&quot;</span><span class="p">)</span>
