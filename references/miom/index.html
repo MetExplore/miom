@@ -417,6 +417,48 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.add_constraints" class="md-nav__link">
+    add_constraints()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.get_fluxes" class="md-nav__link">
+    get_fluxes()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.get_values" class="md-nav__link">
+    get_values()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.keep" class="md-nav__link">
+    keep()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.obtain_subnetwork" class="md-nav__link">
+    obtain_subnetwork()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.reset" class="md-nav__link">
+    reset()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#miom.miom.BaseModel.select_subnetwork" class="md-nav__link">
     select_subnetwork()
   </a>
@@ -424,8 +466,43 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.set_flux_bounds" class="md-nav__link">
+    set_flux_bounds()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.set_fluxes_for" class="md-nav__link">
+    set_fluxes_for()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.set_objective" class="md-nav__link">
+    set_objective()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.set_rxn_objective" class="md-nav__link">
+    set_rxn_objective()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#miom.miom.BaseModel.setup" class="md-nav__link">
     setup()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.steady_state" class="md-nav__link">
+    steady_state()
   </a>
   
 </li>
@@ -525,6 +602,48 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.add_constraints" class="md-nav__link">
+    add_constraints()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.get_fluxes" class="md-nav__link">
+    get_fluxes()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.get_values" class="md-nav__link">
+    get_values()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.keep" class="md-nav__link">
+    keep()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.obtain_subnetwork" class="md-nav__link">
+    obtain_subnetwork()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.reset" class="md-nav__link">
+    reset()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#miom.miom.BaseModel.select_subnetwork" class="md-nav__link">
     select_subnetwork()
   </a>
@@ -532,8 +651,43 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.set_flux_bounds" class="md-nav__link">
+    set_flux_bounds()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.set_fluxes_for" class="md-nav__link">
+    set_fluxes_for()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.set_objective" class="md-nav__link">
+    set_objective()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.set_rxn_objective" class="md-nav__link">
+    set_rxn_objective()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#miom.miom.BaseModel.setup" class="md-nav__link">
     setup()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miom.miom.BaseModel.steady_state" class="md-nav__link">
+    steady_state()
   </a>
   
 </li>
@@ -654,11 +808,449 @@ depending on the solver.</p>
 
 
 
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="miom.miom.BaseModel.add_constraints" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">add_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constraints</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Add a list of constraint to the model</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>constraints</code></td>
+        <td><code>list</code></td>
+        <td><p>List of expressions with the
+constraints.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>BaseModel</code></td>
+      <td><p>instance of BaseModel with the modifications applied.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>miom/miom.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@_autochain</span>
+<span class="k">def</span> <span class="nf">add_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constraints</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add a list of constraint to the model</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        constraints (list): List of expressions with the</span>
+<span class="sd">            constraints.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        BaseModel: instance of BaseModel with the modifications applied.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">constraints</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">constraints</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
 
 
 
 
+  <div class="doc doc-object doc-method">
 
+
+
+<h3 id="miom.miom.BaseModel.get_fluxes" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_fluxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reactions</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Get the flux values.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>reactions</code></td>
+        <td><code>list</code></td>
+        <td><p>Reaction or subset of reactions
+For which to obtain the flux values. Defaults to None.</p></td>
+        <td><code>None</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>list</code></td>
+      <td><p>List with the flux values for all or the selected reactions.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>miom/miom.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_fluxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reactions</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the flux values.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        reactions (list, optional): Reaction or subset of reactions</span>
+<span class="sd">            For which to obtain the flux values. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: List with the flux values for all or the selected reactions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reactions</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">flux_values</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">get_reaction_id</span><span class="p">(</span><span class="n">reactions</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reactions</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">r</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">flux_values</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">get_reaction_id</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])]</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">reactions</span>
+        <span class="p">}</span>
+    <span class="k">if</span> <span class="n">reactions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">flux_values</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;reactions should be an iterable of strings or a single string&quot;</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="miom.miom.BaseModel.get_values" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Get the values for the variables</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>tuple</code></td>
+      <td><p>(V, X) where V are the flux values and X are the indicator values
+    (if the problem is a MIP problem, for example if <code>subset_selection</code> was
+    called)</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>miom/miom.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the values for the variables</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: (V, X) where V are the flux values and X are the indicator values</span>
+<span class="sd">            (if the problem is a MIP problem, for example if `subset_selection` was</span>
+<span class="sd">            called)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="miom.miom.BaseModel.keep" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">keep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reactions</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Force the inclusion of a list of reactions in the solution.</p>
+<p>Reactions have to be associated with positive weights in order to
+keep them in the final solution.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>reactions</code></td>
+        <td><code>list</code></td>
+        <td><p>List of reaction names, a binary vector
+indicating the reactions to keep, or a list of indexes
+with the reactions to keep.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>BaseModel</code></td>
+      <td><p>instance of BaseModel with the modifications applied.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>miom/miom.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@_autochain</span>
+<span class="k">def</span> <span class="nf">keep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reactions</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Force the inclusion of a list of reactions in the solution.</span>
+
+<span class="sd">    Reactions have to be associated with positive weights in order to</span>
+<span class="sd">    keep them in the final solution.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        reactions (list): List of reaction names, a binary vector</span>
+<span class="sd">            indicating the reactions to keep, or a list of indexes</span>
+<span class="sd">            with the reactions to keep.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        BaseModel: instance of BaseModel with the modifications applied.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">indicators</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No indicator variables for reactions, &quot;</span>
+                         <span class="s2">&quot;transform it to a subset selection problem calling &quot;</span>
+                         <span class="s2">&quot;subset_selection first, providing positive weights for the &quot;</span>
+                         <span class="s2">&quot;reactions you want to keep.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">reactions</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">reactions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reactions</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">reactions</span> <span class="o">=</span> <span class="p">[</span><span class="n">reactions</span><span class="p">]</span>
+    <span class="c1"># Check if the reactions have an indicator variable</span>
+    <span class="n">reactions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">find_reaction</span><span class="p">(</span><span class="n">rxn</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">rxn</span> <span class="ow">in</span> <span class="n">reactions</span><span class="p">)</span>
+    <span class="n">available</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">rxn</span><span class="o">.</span><span class="n">index</span> <span class="k">for</span> <span class="n">rxn</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">assigned_reactions</span> <span class="k">if</span> <span class="n">rxn</span><span class="o">.</span><span class="n">cost</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">reactions</span> <span class="o">-</span> <span class="n">available</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Only reactions associated with positive weights &quot;</span>
+                         <span class="sa">f</span><span class="s2">&quot;can be forced to be selected. The following reaction &quot;</span>
+                         <span class="sa">f</span><span class="s2">&quot;indexes have no indicator variables or are associated with &quot;</span>
+                         <span class="sa">f</span><span class="s2">&quot;negative weights: </span><span class="si">{</span><span class="n">diff</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+    <span class="n">valid_rxn_idx</span> <span class="o">=</span> <span class="n">reactions</span> <span class="o">&amp;</span> <span class="n">available</span>
+    <span class="c1"># Get the indexes of the indicator variables</span>
+    <span class="n">idxs</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">assigned_reactions</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">index</span> <span class="ow">in</span> <span class="n">valid_rxn_idx</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">idxs</span><span class="o">=</span><span class="n">idxs</span><span class="p">,</span> <span class="n">valid_rxn_idx</span><span class="o">=</span><span class="n">valid_rxn_idx</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="miom.miom.BaseModel.obtain_subnetwork" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">obtain_subnetwork</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extraction_mode</span><span class="o">=&lt;</span><span class="n">ExtractionMode</span><span class="o">.</span><span class="n">ABSOLUTE_FLUX_VALUE</span><span class="p">:</span> <span class="s1">&#39;flux_value&#39;</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">comparator</span><span class="o">=&lt;</span><span class="n">Comparator</span><span class="o">.</span><span class="n">GREATER_OR_EQUAL</span><span class="p">:</span> <span class="s1">&#39;geq&#39;</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">1e-06</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Same as <a href="#miom.miom.BaseModel">select_subnetwork</a> but returns the network instead.</p>
+<p>See <a href="#miom.miom.BaseModel">select_subnetwork</a> for a detailed description of the method.</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>MiomNetwork</code></td>
+      <td><p>A MiomNetwork with the selected subnetwork.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>miom/miom.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">obtain_subnetwork</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">extraction_mode</span><span class="o">=</span><span class="n">ExtractionMode</span><span class="o">.</span><span class="n">ABSOLUTE_FLUX_VALUE</span><span class="p">,</span>
+        <span class="n">comparator</span><span class="o">=</span><span class="n">Comparator</span><span class="o">.</span><span class="n">GREATER_OR_EQUAL</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="mf">1e-6</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Same as [select_subnetwork][miom.miom.BaseModel] but returns the network instead.</span>
+
+<span class="sd">    See [select_subnetwork][miom.miom.BaseModel] for a detailed description of the method.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        MiomNetwork: A MiomNetwork with the selected subnetwork.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># If indicators are present and assigned,</span>
+    <span class="c1"># take the subset of the network for which</span>
+    <span class="c1"># the indicators of positive weighted reactions</span>
+    <span class="c1"># are equal to 1</span>
+    <span class="k">if</span> <span class="n">extraction_mode</span> <span class="o">==</span> <span class="n">ExtractionMode</span><span class="o">.</span><span class="n">ABSOLUTE_FLUX_VALUE</span><span class="p">:</span>
+        <span class="n">variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">flux_values</span>
+        <span class="k">if</span> <span class="n">variables</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The model does not contain flux variables. &quot;</span>
+                             <span class="s2">&quot;You need to call first steady_state() to add &quot;</span>
+                             <span class="s2">&quot;the flux variables&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">extraction_mode</span> <span class="o">==</span> <span class="n">ExtractionMode</span><span class="o">.</span><span class="n">INDICATOR_VALUE</span><span class="p">:</span>
+        <span class="n">variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">indicator_values</span>
+        <span class="k">if</span> <span class="n">variables</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The model does not contain indicator variables. &quot;</span>
+                             <span class="s2">&quot;You need to transform it to a subset selection problem &quot;</span>
+                             <span class="s2">&quot;by invoking subset_selection() first.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid extraction mode&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">comparator</span> <span class="o">==</span> <span class="n">Comparator</span><span class="o">.</span><span class="n">GREATER_OR_EQUAL</span><span class="p">:</span>
+        <span class="n">selected</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">value</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">comparator</span> <span class="o">==</span> <span class="n">Comparator</span><span class="o">.</span><span class="n">LESS_OR_EQUAL</span><span class="p">:</span>
+        <span class="n">selected</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">value</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid comparison&quot;</span><span class="p">)</span>
+    <span class="c1"># TODO: Assigned reactions work only for indicator variables</span>
+    <span class="k">if</span> <span class="n">extraction_mode</span> <span class="o">==</span> <span class="n">ExtractionMode</span><span class="o">.</span><span class="n">INDICATOR_VALUE</span><span class="p">:</span>
+        <span class="n">rxns</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">assigned_reactions</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">selected</span><span class="p">]</span>
+        <span class="n">selected_idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">rxn</span><span class="o">.</span><span class="n">index</span> <span class="k">for</span> <span class="n">rxn</span> <span class="ow">in</span> <span class="n">rxns</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">selected_idx</span> <span class="o">=</span> <span class="n">selected</span>
+    <span class="n">S_sub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">S</span><span class="p">[:,</span> <span class="n">selected_idx</span><span class="p">]</span>
+    <span class="n">R_sub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">R</span><span class="p">[</span><span class="n">selected_idx</span><span class="p">]</span>
+    <span class="n">act_met</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">S_sub</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="n">M_sub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">M</span><span class="p">[</span><span class="n">act_met</span><span class="p">]</span>
+    <span class="n">S_sub</span> <span class="o">=</span> <span class="n">S_sub</span><span class="p">[</span><span class="n">act_met</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="k">return</span> <span class="n">MiomNetwork</span><span class="p">(</span><span class="n">S_sub</span><span class="p">,</span> <span class="n">R_sub</span><span class="p">,</span> <span class="n">M_sub</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="miom.miom.BaseModel.reset" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Resets the original problem (removes all modifications)</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>BaseModel</code></td>
+      <td><p>instance of BaseModel with the modifications applied.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>miom/miom.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@_autochain</span>
+<span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Resets the original problem (removes all modifications)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        BaseModel: instance of BaseModel with the modifications applied.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">problem</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Problem is not initialized, nothing to reset&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
 
 
 
@@ -767,7 +1359,336 @@ Defaults to 1e-8.</p></td>
 
 
 
+  <div class="doc doc-object doc-method">
 
+
+
+<h3 id="miom.miom.BaseModel.set_flux_bounds" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">set_flux_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rxn_id</span><span class="p">,</span> <span class="n">min_flux</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_flux</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Change the flux bounds of a reaction.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>rxn_id</code></td>
+        <td><code>str/int</code></td>
+        <td><p>name or id of the reaction to change</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>min_flux</code></td>
+        <td><code>float</code></td>
+        <td><p>Min flux value. Defaults to None.</p></td>
+        <td><code>None</code></td>
+      </tr>
+      <tr>
+        <td><code>max_flux</code></td>
+        <td><code>float</code></td>
+        <td><p>Max flux value. Defaults to None.</p></td>
+        <td><code>None</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>BaseModel</code></td>
+      <td><p>instance of BaseModel with the modifications applied.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>miom/miom.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@_autochain</span>
+<span class="k">def</span> <span class="nf">set_flux_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rxn_id</span><span class="p">,</span> <span class="n">min_flux</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_flux</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Change the flux bounds of a reaction.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        rxn_id (str/int): name or id of the reaction to change</span>
+<span class="sd">        min_flux (float, optional): Min flux value. Defaults to None.</span>
+<span class="sd">        max_flux (float, optional): Max flux value. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        BaseModel: instance of BaseModel with the modifications applied.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">find_reaction</span><span class="p">(</span><span class="n">rxn_id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">i</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="miom.miom.BaseModel.set_fluxes_for" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">set_fluxes_for</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reactions</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">1e-06</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Force the flux of certain reactions to match current values.</p>
+<p>After calling <code>.solve()</code> for a flux optimization problem (e.g. FBA), this
+method adds a new constraint to force the flux of the given reactions to
+match the current flux values found after the optimization.</p>
+<p>This is interesting for example to implement methods like sparse-FBA, where
+the optimization is no longer the flux but the number of active reactions,
+and a new constraint is required to preserve optimality of fluxes.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>reactions</code></td>
+        <td><code>list</code></td>
+        <td><p>reaction or list of reactions</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>tolerance</code></td>
+        <td><code>float</code></td>
+        <td><p>Tolerance for the flux values
+(a solution is valid if the flux is within optimal value +/- tol. 
+Defaults to 1e-6.</p></td>
+        <td><code>1e-06</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>BaseModel</code></td>
+      <td><p>instance of BaseModel with the modifications applied.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>miom/miom.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">set_fluxes_for</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reactions</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Force the flux of certain reactions to match current values.</span>
+
+<span class="sd">    After calling `.solve()` for a flux optimization problem (e.g. FBA), this</span>
+<span class="sd">    method adds a new constraint to force the flux of the given reactions to</span>
+<span class="sd">    match the current flux values found after the optimization.</span>
+
+<span class="sd">    This is interesting for example to implement methods like sparse-FBA, where</span>
+<span class="sd">    the optimization is no longer the flux but the number of active reactions,</span>
+<span class="sd">    and a new constraint is required to preserve optimality of fluxes.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        reactions (list): reaction or list of reactions</span>
+<span class="sd">        tolerance (float, optional): Tolerance for the flux values</span>
+<span class="sd">            (a solution is valid if the flux is within optimal value +/- tol. </span>
+<span class="sd">            Defaults to 1e-6.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        BaseModel: instance of BaseModel with the modifications applied.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">find_reaction</span><span class="p">(</span><span class="n">reactions</span><span class="p">)</span>
+    <span class="n">lb</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;lb&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">flux_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">tolerance</span><span class="p">)</span>
+    <span class="n">ub</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;ub&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">flux_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">tolerance</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">fluxes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">lb</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">add_constraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">fluxes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">ub</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="miom.miom.BaseModel.set_objective" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">set_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cost_vector</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Set the optmization objective of the model.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>cost_vector</code></td>
+        <td><code>Iterable</code></td>
+        <td><p>List with the cost for each variable</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>variables</code></td>
+        <td><code>Iterable</code></td>
+        <td><p>Variables used for the objective function</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>direction</code></td>
+        <td><code>str</code></td>
+        <td><p>Optimization direction (min or max). Defaults to 'max'.</p></td>
+        <td><code>&#39;max&#39;</code></td>
+      </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>miom/miom.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@_autochain</span>
+<span class="k">def</span> <span class="nf">set_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cost_vector</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set the optmization objective of the model.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cost_vector (Iterable): List with the cost for each variable</span>
+<span class="sd">        variables (Iterable): Variables used for the objective function</span>
+<span class="sd">        direction (str, optional): Optimization direction (min or max). Defaults to &#39;max&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Previous objective changed&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="p">(</span><span class="n">cost_vector</span><span class="p">,</span> <span class="n">variables</span><span class="p">,</span> <span class="n">direction</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="miom.miom.BaseModel.set_rxn_objective" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">set_rxn_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rxn</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Set a flux objective</p>
+<p>Maximize or minimize the flux through a given reaction.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>rxn</code></td>
+        <td><code>str</code></td>
+        <td><p>Name of the reaction to use for the optimization</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>direction</code></td>
+        <td><code>str</code></td>
+        <td><p>Minimization or maximization of 
+the flux ('min' or 'max'). Defaults to 'max'.</p></td>
+        <td><code>&#39;max&#39;</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>BaseModel</code></td>
+      <td><p>instance of BaseModel with the modifications applied.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>miom/miom.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">set_rxn_objective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rxn</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set a flux objective</span>
+
+<span class="sd">    Maximize or minimize the flux through a given reaction.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        rxn (str): Name of the reaction to use for the optimization</span>
+<span class="sd">        direction (str, optional): Minimization or maximization of </span>
+<span class="sd">            the flux (&#39;min&#39; or &#39;max&#39;). Defaults to &#39;max&#39;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        BaseModel: instance of BaseModel with the modifications applied.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">find_reaction</span><span class="p">(</span><span class="n">rxn</span><span class="p">)</span>
+    <span class="n">cost</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">cost</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">set_objective</span><span class="p">(</span><span class="n">cost</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">fluxes</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="n">direction</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
 
 
 
@@ -885,6 +1806,57 @@ Defaults to 0.</p></td>
   </div>
 
 
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="miom.miom.BaseModel.steady_state" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">steady_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Add the required constraints for finding steady-state fluxes</p>
+<p>The method adds the <span class="arithmatex">\(S * V = 0\)</span> set of constraints, where <span class="arithmatex">\(S\)</span>
+is the stoichiometric matrix and <span class="arithmatex">\(V\)</span> the flux variables.</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>BaseModel</code></td>
+      <td><p>instance of BaseModel with the modifications applied.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>miom/miom.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@_autochain</span>
+<span class="k">def</span> <span class="nf">steady_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add the required constraints for finding steady-state fluxes</span>
+
+<span class="sd">    The method adds the $S * V = 0$ set of constraints, where $S$</span>
+<span class="sd">    is the stoichiometric matrix and $V$ the flux variables.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        BaseModel: instance of BaseModel with the modifications applied.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
 
 
 
