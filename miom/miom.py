@@ -379,10 +379,31 @@ class BaseModel(ABC):
 
     @_autochain
     def steady_state(self):
+        """Add the required constraints for finding steady-state fluxes
+
+        The method adds the $S * V = 0$ set of constraints, where $S$
+        is the stoichiometric matrix and $V$ the flux variables.
+
+        Returns:
+            BaseModel: instance of BaseModel with the modifications applied.
+        """
         pass
 
     @_autochain
     def keep(self, reactions):
+        """Force the inclusion of a list of reactions in the solution.
+
+        Reactions have to be associated with positive weights in order to
+        keep them in the final solution.
+
+        Args:
+            reactions (list): List of reaction names, a binary vector
+                indicating the reactions to keep, or a list of indexes
+                with the reactions to keep.
+
+        Returns:
+            BaseModel: instance of BaseModel with the modifications applied.
+        """
         if self.variables.indicators is None:
             raise ValueError("No indicator variables for reactions, "
                              "transform it to a subset selection problem calling "
@@ -465,11 +486,30 @@ class BaseModel(ABC):
 
     @_autochain
     def set_flux_bounds(self, rxn_id, min_flux=None, max_flux=None):
+        """Change the flux bounds of a reaction.
+
+        Args:
+            rxn_id (str/int): name or id of the reaction to change
+            min_flux (float, optional): Min flux value. Defaults to None.
+            max_flux (float, optional): Max flux value. Defaults to None.
+
+        Returns:
+            BaseModel: instance of BaseModel with the modifications applied.
+        """
         i, _ = self.network.find_reaction(rxn_id)
         return i
 
     @_autochain
     def add_constraints(self, constraints):
+        """Add a list of constraint to the model
+
+        Args:
+            constraints (list): List of expressions with the
+                constraints.
+
+        Returns:
+            BaseModel: instance of BaseModel with the modifications applied.
+        """
         for c in constraints:
             self.add_constraint(c)
         return len(constraints) > 0
@@ -480,11 +520,30 @@ class BaseModel(ABC):
 
     @_autochain
     def set_objective(self, cost_vector, variables, direction='max'):
+        """Set the optmization objective of the model.
+
+        Args:
+            cost_vector (Iterable): List with the cost for each variable
+            variables (Iterable): Variables used for the objective function
+            direction (str, optional): Optimization direction (min or max). Defaults to 'max'.
+        """
         if self.objective is not None:
             warnings.warn("Previous objective changed")
         self.objective = (cost_vector, variables, direction)
 
     def set_rxn_objective(self, rxn, direction='max'):
+        """Set a flux objective
+
+        Maximize or minimize the flux through a given reaction.
+
+        Args:
+            rxn (str): Name of the reaction to use for the optimization
+            direction (str, optional): Minimization or maximization of 
+                the flux ('min' or 'max'). Defaults to 'max'.
+
+        Returns:
+            BaseModel: instance of BaseModel with the modifications applied.
+        """
         i, _ = self.network.find_reaction(rxn)
         cost = np.zeros((1, self.network.R.shape[0]))
         cost[0, i] = 1
@@ -492,6 +551,25 @@ class BaseModel(ABC):
         return self
 
     def set_fluxes_for(self, reactions, tolerance=1e-6):
+        """Force the flux of certain reactions to match current values.
+
+        After calling `.solve()` for a flux optimization problem (e.g. FBA), this
+        method adds a new constraint to force the flux of the given reactions to
+        match the current flux values found after the optimization.
+
+        This is interesting for example to implement methods like sparse-FBA, where
+        the optimization is no longer the flux but the number of active reactions,
+        and a new constraint is required to preserve optimality of fluxes.
+
+        Args:
+            reactions (list): reaction or list of reactions
+            tolerance (float, optional): Tolerance for the flux values
+                (a solution is valid if the flux is within optimal value +/- tol. 
+                Defaults to 1e-6.
+
+        Returns:
+            BaseModel: instance of BaseModel with the modifications applied.
+        """
         i, r = self.network.find_reaction(reactions)
         lb = max(r['lb'], self.variables.flux_values[i] - tolerance)
         ub = min(r['ub'], self.variables.flux_values[i] + tolerance)
@@ -501,6 +579,11 @@ class BaseModel(ABC):
 
     @_autochain
     def reset(self):
+        """Resets the original problem (removes all modifications)
+
+        Returns:
+            BaseModel: instance of BaseModel with the modifications applied.
+        """
         if self.problem is None:
             warnings.warn("Problem is not initialized, nothing to reset")
             return False
@@ -513,6 +596,13 @@ class BaseModel(ABC):
             comparator=Comparator.GREATER_OR_EQUAL,
             value=1e-6
     ):
+        """Same as [select_subnetwork][miom.miom.BaseModel] but returns the network instead.
+
+        See [select_subnetwork][miom.miom.BaseModel] for a detailed description of the method.
+
+        Returns:
+            MiomNetwork: A MiomNetwork with the selected subnetwork.
+        """
         # If indicators are present and assigned,
         # take the subset of the network for which
         # the indicators of positive weighted reactions
@@ -581,9 +671,25 @@ class BaseModel(ABC):
                                       value=value)
 
     def get_values(self):
+        """Get the values for the variables
+
+        Returns:
+            tuple: (V, X) where V are the flux values and X are the indicator values
+                (if the problem is a MIP problem, for example if `subset_selection` was
+                called)
+        """
         return self.variables.values()
 
     def get_fluxes(self, reactions=None):
+        """Get the flux values.
+
+        Args:
+            reactions (list, optional): Reaction or subset of reactions
+                For which to obtain the flux values. Defaults to None.
+
+        Returns:
+            list: List with the flux values for all or the selected reactions.
+        """
         if isinstance(reactions, str):
             return self.variables.flux_values[self.network.get_reaction_id(reactions)]
         if isinstance(reactions, Iterable):
@@ -765,10 +871,8 @@ class PythonMipModel(BaseModel):
 
     def _subset_selection(self, rxn_weights, **kwargs):
         eps = kwargs["eps"]
-        # Convert to a weighted subset selection problem
         weighted_rxns = self.variables.assigned_reactions
         P = self.problem
-        # Build the MIP problem
         V = self.variables.fluxes
         X = [self.problem.add_var(var_type=mip.BINARY) for _ in weighted_rxns]
         C = [abs(rxn.cost) for rxn in weighted_rxns]
@@ -800,7 +904,7 @@ class PythonMipModel(BaseModel):
 
     def _steady_state(self, **kwargs):
         V = [self.problem.add_var(lb=rxn['lb'], ub=rxn['ub']) for rxn in self.network.R]
-        # (Python-MIP does not allow matrix operations like CyLP or PICOS)
+        # (Python-MIP does not allow matrix operations like CyLP or CXVOPT)
         for i in range(self.network.S.shape[0]):
             self.problem += mip.xsum(self.network.S[i, j] * V[j]
                                      for j in range(self.network.R.shape[0]) if self.network.S[i, j] != 0) == 0
