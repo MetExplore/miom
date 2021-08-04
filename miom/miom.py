@@ -336,6 +336,10 @@ class BaseModel(ABC):
     def initialize_problem(self):
         pass
 
+    @abstractmethod
+    def get_solver_status(self):
+        pass
+
     @_autochain
     def setup(self, **kwargs):
         """Provide the options for the solver.
@@ -781,7 +785,7 @@ class PicosModel(BaseModel):
             self.problem.options["timelimit"] = max_seconds
         if verbosity is not None:
             self.problem.options["verbosity"] = verbosity
-        solutions = self.problem.solve()
+        self.solutions = self.problem.solve()
         return True
 
     def _add_constraint(self, constraint, **kwargs):
@@ -812,6 +816,13 @@ class PicosModel(BaseModel):
     def _copy(self, **kwargs):
         return PicosModel(previous_step_model=self)
 
+    def get_solver_status(self):
+        solver_status = {}
+        solver_status['status'] = str(self.solutions.claimedStatus)
+        solver_status['objective_value'] = float(self.problem.value)
+        solver_status['solver_time_seconds'] = self.solutions.searchTime
+        return solver_status
+
 
 class PythonMipModel(BaseModel):
     def __init__(self, previous_step_model=None, miom_network=None, solver_name=None):
@@ -841,6 +852,8 @@ class PythonMipModel(BaseModel):
         self.problem.opt_tol = self.problem.infeas_tol
         self.problem.integer_tol = kwargs["int_tol"] if "int_tol" in kwargs else self._options["int_tol"]
         self.problem.verbose = kwargs["verbosity"] if "verbosity" in kwargs else self._options["verbosity"]
+        self.problem.store_search_progress_log = True
+        self.problem.threads = -1
         return True
 
     def _reset(self, **kwargs):
@@ -933,3 +946,9 @@ class PythonMipModel(BaseModel):
     def _copy(self, **kwargs):
         return PythonMipModel(previous_step_model=self)
 
+    def get_solver_status(self):
+        solver_status = {}
+        solver_status['status'] = str(self.problem.status.name)
+        solver_status['objective_value'] = float(self.problem.objective_value)
+        solver_status['solver_time_seconds'] = self.problem.search_progress_log.log[-1:][0][0]
+        return solver_status
