@@ -24,6 +24,4 @@ jobs:
           python-version: '3.7'
         
       - name: Deploy with MkDocs
-        run: |
-          git pull
-          mkdocs gh-deploy
+        run: mkdocs gh-deploy
