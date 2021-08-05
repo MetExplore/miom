@@ -265,7 +265,7 @@ def _autochain(fn):
         # Find subclass implementation
         fname = '_' + fn.__name__
         if not hasattr(self, fname):
-            raise ValueError(f'Method "{fn.__name__}()" is marked as @fluent '
+            raise ValueError(f'Method "{fn.__name__}()" is marked as @_autochain '
                              f'but the expected implementation "{fname}()" was not provided '
                              f'by {self.__class__.__name__}')
         func = getattr(self, fname)
