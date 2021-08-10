@@ -176,6 +176,11 @@ class _Variables(ABC):
         self._flux_vars = flux_vars
         self._indicator_vars = indicator_vars
         self._assigned_reactions = assigned_reactions
+        self._solver_correspondance = {'CUTOFF':'premature','ERROR':'failure',
+                                        'FEASIBLE':'feasible','INFEASIBLE':'infeasible',
+                                        'INT-INFEASIBLE':'infeasible','LOADED':'detached',
+                                        'NO-SOLUTION-FOUND':'illposed','OPTIMAL':'optimal',
+                                        'UNBOUNDED':'unbounded'}
 
     @property
     def indicators(self):
@@ -201,6 +206,10 @@ class _Variables(ABC):
 
     def values(self):
         return self.flux_values, self.indicator_values
+
+    @property
+    def solver_correspondance(self):
+        return self._solver_correspondance
 
 
 class _PicosVariables(_Variables):
@@ -969,7 +978,7 @@ class PythonMipModel(BaseModel):
 
     def get_solver_status(self):
         solver_status = {}
-        solver_status['status'] = str(self.problem.status.name)
+        solver_status['status'] = self.variables.solver_correspondance[str(self.problem.status.name)]
         solver_status['objective_value'] = float(self.problem.objective_value)
         solver_status['solver_time_seconds'] = self.problem.search_progress_log.log[-1:][0][0]
         return solver_status
