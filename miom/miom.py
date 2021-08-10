@@ -398,7 +398,10 @@ class BaseModel(ABC):
         """Force the inclusion of a list of reactions in the solution.
 
         Reactions have to be associated with positive weights in order to
-        keep them in the final solution.
+        keep them in the final solution. Note that once keep() is called,
+        the weights associated to the reactions selected to be kept will
+        not be taken into account, as they will be forced to be kept in
+        the solution.
 
         Args:
             reactions (list): List of reaction names, a binary vector
@@ -441,7 +444,9 @@ class BaseModel(ABC):
         state constraints and/or additional constraints on fluxes, and maximizing
         the weighted sum of the (absolute) weights for the successfully selected reactions
         (with positive weights) and the successfully removed reactions (with negative
-        weights)
+        weights). Selected reactions are forced to have an absolute flux value greater 
+        or equal to the threshold `eps` (1e-2 by default). Removed reactions should have a
+        flux equal to 0.
 
         Each reaction is associated with a weight (positive or negative) provided
         in the parameter `rxn_weights`, and the objective is to select the reactions 
@@ -454,11 +459,12 @@ class BaseModel(ABC):
         where $x_i$ are the indicator variables for the reactions $i$ and $w_i$ are
         the weights for the reactions associated to the indicator variable. Indicator
         variables are automatically created for each reaction associated to a non-zero
-        weight. Two (mutually exclusive) indicator variables are used for positive weighted reactions 
-        that are reversible to indicate whether there is positive or negative flux 
+        weight. Two (mutually exclusive) indicator variables are used for positive weighted 
+        reactions that are reversible to indicate whether there is positive or negative flux 
         through the reaction. A single indicator variable is created for positive weighted
-        non-reversible reactions, to indicate if the reaction is selected (has a non-zero flux)
-        in which case the indicator variable is 1, or 0 otherwise. 
+        non-reversible reactions, to indicate if the reaction is selected (has a non-zero 
+        flux greater or equal to `eps`) in which case the indicator variable is 1, 
+        or 0 otherwise. 
         
         A single binary indicator variable is also created for negative weighted reactions, 
         indicating whether the reaction was not selected (i.e, has 0 flux, in which case the
@@ -476,7 +482,8 @@ class BaseModel(ABC):
         # Calculate min valid EPS based on integrality tolerance
         min_eps = self._options["_min_eps"]
         if eps < min_eps:
-            warnings.warn(f"The minimum epsilon value is {min_eps}, which is less than {eps}.")
+            warnings.warn(f"The minimum epsilon value for the current solver \
+                parameters is {min_eps}, which is less than {eps}.")
         eps = max(eps, min_eps)
         if not isinstance(rxn_weights, Iterable):
             rxn_weights = [rxn_weights] * self.network.num_reactions
@@ -520,6 +527,13 @@ class BaseModel(ABC):
 
     @_autochain
     def add_constraint(self, constraint):
+        """Add a specific constraint to the model.
+
+        The constraint should use existing variables already included in the model.
+
+        Args:
+            constraint: affine expression using model's variables.
+        """
         pass
 
     @_autochain
@@ -708,6 +722,13 @@ class BaseModel(ABC):
 
     @_autochain
     def solve(self, verbosity=None, max_seconds=None):
+        """Solve the current model and assign the values to the variables of the model.
+
+        Args:
+            verbosity (int, optional): Level of verbosity for the solver. 
+                Values above 0 will force the backend to show output information of the search. Defaults to None.
+            max_seconds (int, optional): Max time in seconds for the search. Defaults to None.
+        """
         pass
 
     @_autochain
@@ -882,7 +903,7 @@ class PythonMipModel(BaseModel):
         if max_flux is not None:
             self.variables.fluxes[i].ub = max_flux
 
-    def _subset_selection(self, rxn_weights, **kwargs):
+    def _subset_selection(self, *args, **kwargs):
         eps = kwargs["eps"]
         weighted_rxns = self.variables.assigned_reactions
         P = self.problem
