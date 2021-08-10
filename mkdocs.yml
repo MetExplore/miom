@@ -10,6 +10,10 @@ theme:
     custom_dir: docs/overrides
 plugins:
 - search
+- minify:
+    minify_html: true
+    htmlmin_opts:
+        remove_comments: true
 - mkdocstrings:
     handlers:
       python:
