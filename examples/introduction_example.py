@@ -31,3 +31,4 @@ V, X = (model
         .get_values())
 
 print("Number of reactions with non-zero flux:", sum(abs(V) > 1e-8))
+print("Solver status:", model.get_solver_status())

@@ -1,18 +1,27 @@
+import numpy as np
+import warnings
+import picos as pc
+import mip
 from abc import ABC, abstractmethod
 from functools import wraps
 from collections.abc import Iterable
 from miom.mio import load_gem, MiomNetwork
-import picos as pc
-import mip
 from typing import NamedTuple
 from enum import Enum, auto
-import numpy as np
-import warnings
+from time import perf_counter
 
 
-class Status(str, Enum):
-    # TODO: Use common status for PICOS and PythonMIP
-    pass
+_STATUS_MAPPING = {
+    mip.OptimizationStatus.OPTIMAL: pc.modeling.solution.SS_OPTIMAL,
+    mip.OptimizationStatus.FEASIBLE: pc.modeling.solution.SS_FEASIBLE,
+    mip.OptimizationStatus.INFEASIBLE: pc.modeling.solution.SS_INFEASIBLE,
+    mip.OptimizationStatus.UNBOUNDED: pc.modeling.solution.PS_UNBOUNDED,
+    mip.OptimizationStatus.INT_INFEASIBLE: pc.modeling.solution.SS_INFEASIBLE,
+    mip.OptimizationStatus.NO_SOLUTION_FOUND: pc.modeling.solution.PS_ILLPOSED,
+    mip.OptimizationStatus.LOADED: pc.modeling.solution.VS_EMPTY,
+    mip.OptimizationStatus.CUTOFF: pc.modeling.solution.SS_PREMATURE
+}
+
 
 class Solvers(str, Enum):
     """Solvers supported by the miom module.
@@ -327,6 +336,8 @@ class BaseModel(ABC):
         self.network = miom_network
         self.variables = None
         self.objective = None
+        self._last_start_time = None
+        self.last_solver_time = None
         if previous_step_model is not None:
             self._options = previous_step_model._options
             if miom_network is None:
@@ -742,7 +753,7 @@ class BaseModel(ABC):
                 Values above 0 will force the backend to show output information of the search. Defaults to None.
             max_seconds (int, optional): Max time in seconds for the search. Defaults to None.
         """
-        pass
+        self._last_start_time = perf_counter()
 
     @_autochain
     def copy(self):
@@ -824,6 +835,7 @@ class PicosModel(BaseModel):
         self.solutions = self.problem.solve()
         self.problem.options["timelimit"] = init_max_seconds
         self.problem.options["verbosity"] = init_verbosity
+        self.last_solver_time = perf_counter() - self._last_start_time
         return True
 
     def _add_constraint(self, constraint, **kwargs):
@@ -950,6 +962,7 @@ class PythonMipModel(BaseModel):
             self.setup(verbosity=verbosity)
         solutions = self.problem.optimize(max_seconds=max_seconds)
         self.setup(verbosity=init_verbosity)
+        self.last_solver_time = perf_counter() - self._last_start_time
         return True
 
     def _add_constraint(self, constraint, **kwargs):
@@ -987,8 +1000,12 @@ class PythonMipModel(BaseModel):
         return PythonMipModel(previous_step_model=self)
 
     def get_solver_status(self):
-        solver_status = {}
-        solver_status['status'] = self.variables.solver_correspondance[str(self.problem.status.name)]
-        solver_status['objective_value'] = float(self.problem.objective_value)
-        solver_status['solver_time_seconds'] = self.problem.search_progress_log.log[-1:][0][0]
-        return solver_status
+        #solver_status['elapsed_seconds'] = self.problem.search_progress_log.log[-1:][0][0]
+        return {
+            "status": _STATUS_MAPPING[self.problem.status] \
+                if self.problem.status in _STATUS_MAPPING \
+                     else pc.modeling.solution.PS_UNKNOWN,
+            "objective_value": self.problem.objective_value,
+            "elapsed_seconds": self.last_solver_time
+        }
+
