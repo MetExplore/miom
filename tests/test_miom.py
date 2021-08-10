@@ -5,7 +5,6 @@ from miom.miom import (
     PythonMipModel,
     PicosModel
 )
-import unittest
 import pytest
 from miom.mio import load_gem
 import pathlib
@@ -159,7 +158,7 @@ def test_keep_rxn(model):
         .solve()
         .get_values()
     )
-    assert True
+    assert abs(V[i]) > 1e-8
 
 def test_copy(model):
     c = model.copy()

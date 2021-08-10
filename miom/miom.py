@@ -10,6 +10,10 @@ import numpy as np
 import warnings
 
 
+class Status(str, Enum):
+    # TODO: Use common status for PICOS and PythonMIP
+    pass
+
 class Solvers(str, Enum):
     """Solvers supported by the miom module.
     
@@ -811,11 +815,15 @@ class PicosModel(BaseModel):
     def _solve(self, **kwargs):
         max_seconds = kwargs["max_seconds"] if "max_seconds" in kwargs else None
         verbosity = kwargs["verbosity"] if "verbosity" in kwargs else None
+        init_max_seconds = self.problem.options["timelimit"]
+        init_verbosity = self.problem.options["verbosity"]
         if max_seconds is not None:
             self.problem.options["timelimit"] = max_seconds
         if verbosity is not None:
             self.problem.options["verbosity"] = verbosity
         self.solutions = self.problem.solve()
+        self.problem.options["timelimit"] = init_max_seconds
+        self.problem.options["verbosity"] = init_verbosity
         return True
 
     def _add_constraint(self, constraint, **kwargs):
@@ -937,9 +945,11 @@ class PythonMipModel(BaseModel):
     def _solve(self, **kwargs):
         max_seconds = kwargs["max_seconds"] if "max_seconds" in kwargs else 10 * 60
         verbosity = kwargs["verbosity"] if "verbosity" in kwargs else None
+        init_verbosity = self.problem.verbose
         if verbosity is not None:
             self.setup(verbosity=verbosity)
         solutions = self.problem.optimize(max_seconds=max_seconds)
+        self.setup(verbosity=init_verbosity)
         return True
 
     def _add_constraint(self, constraint, **kwargs):
