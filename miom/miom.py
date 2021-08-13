@@ -1,13 +1,26 @@
+import numpy as np
+import warnings
+import picos as pc
+import mip
 from abc import ABC, abstractmethod
 from functools import wraps
 from collections.abc import Iterable
 from miom.mio import load_gem, MiomNetwork
-import picos as pc
-import mip
 from typing import NamedTuple
 from enum import Enum, auto
-import numpy as np
-import warnings
+from time import perf_counter
+
+
+_STATUS_MAPPING = {
+    mip.OptimizationStatus.OPTIMAL: pc.modeling.solution.SS_OPTIMAL,
+    mip.OptimizationStatus.FEASIBLE: pc.modeling.solution.SS_FEASIBLE,
+    mip.OptimizationStatus.INFEASIBLE: pc.modeling.solution.SS_INFEASIBLE,
+    mip.OptimizationStatus.UNBOUNDED: pc.modeling.solution.PS_UNBOUNDED,
+    mip.OptimizationStatus.INT_INFEASIBLE: pc.modeling.solution.SS_INFEASIBLE,
+    mip.OptimizationStatus.NO_SOLUTION_FOUND: pc.modeling.solution.PS_ILLPOSED,
+    mip.OptimizationStatus.LOADED: pc.modeling.solution.VS_EMPTY,
+    mip.OptimizationStatus.CUTOFF: pc.modeling.solution.SS_PREMATURE
+}
 
 
 class Solvers(str, Enum):
@@ -107,7 +120,8 @@ class ExtractionMode(str, Enum):
             ```
     """
     ABSOLUTE_FLUX_VALUE = "flux_value",
-    INDICATOR_VALUE = "indicator_value"
+    INDICATOR_VALUE = "indicator_value",
+    REACTION_ACTIVITY = "reaction_activity"
 
 
 class Comparator(str, Enum):
@@ -132,6 +146,7 @@ _RxnVar = NamedTuple(
         ("cost", float),
         ("type", _ReactionType)
     ])
+
 
 def miom(network, solver=Solvers.COIN_OR_CBC):
     """
@@ -171,6 +186,7 @@ def miom(network, solver=Solvers.COIN_OR_CBC):
     else:
         return PicosModel(miom_network=network, solver_name=solver)
 
+
 class _Variables(ABC):
     def __init__(self, flux_vars=None, indicator_vars=None, assigned_reactions=None):
         self._flux_vars = flux_vars
@@ -194,6 +210,48 @@ class _Variables(ABC):
     @abstractmethod
     def indicator_values(self):
         pass
+
+    @property
+    def reaction_activity(self):
+        """Returns a list indicating whether a reaction is active or not.
+
+        It uses the value of the indicator variables of the subset selection
+        problem to indicate whether a reaction is active (has positive or
+        negative flux, in which case the value is 1 or -1. A value of None 
+        indicates that the reaction has no associated indicator variable. 
+        A value of `nan` indicates that the value of the reaction is 
+        inconsistent after solving the subset selection problem.
+
+        Returns:
+            list: list of the same length as the number of reactions in the model.
+        """
+        activity = [None] * len(self.fluxes)
+        values = self.indicator_values
+        if values is None:
+            raise ValueError("The indicator values are not set. This means that \
+                the problem is not a MIP (subset_selection method was not called). \
+                If you want to select a subset of reactions based on a flux value, \
+                use the method select_subnetwork or obtain_subnetwork instead.")
+        for i, rxn in enumerate(self.assigned_reactions):
+            curr_value = activity[rxn.index]
+            if rxn.type == _ReactionType.RH_POS or rxn.type == _ReactionType.RH_NEG:
+                v = 0 if curr_value is None else curr_value
+                v += values[i]
+                activity[rxn.index] = v
+            elif rxn.type == _ReactionType.RL:
+                if curr_value is not None:
+                    raise ValueError("Multiple indicator variables for the same RL type reaction")
+                activity[rxn.index] = 1 - values[i]
+        # Replace inconsistent values (can happen due to numerical issues)
+        for i in range(len(activity)):
+            if activity[i] is not None and activity[i] > 1:
+                activity[i] = float('nan')
+        # Add sign
+        for i, rxn in enumerate(self.assigned_reactions):
+            if rxn.type == _ReactionType.RH_NEG and values[i] > 0:
+                activity[rxn.index] = -1 * activity[rxn.index]
+        return activity
+
 
     @property
     def assigned_reactions(self):
@@ -243,10 +301,10 @@ class _PythonMipVariables(_Variables):
         return None
 
 
-def _autochain(fn):
+def _partial(fn):
     """Annotation for methods that return the instance itself to enable chaining.
 
-    If a method `my_method` is annotated with @_autochain, a method called `_my_method`
+    If a method `my_method` is annotated with @_partial, a method called `_my_method`
     is expected to be provided by a subclass. Parent method `my_method` is called first
     and the result is passed to the child method `_my_method`.
 
@@ -265,7 +323,7 @@ def _autochain(fn):
         # Find subclass implementation
         fname = '_' + fn.__name__
         if not hasattr(self, fname):
-            raise ValueError(f'Method "{fn.__name__}()" is marked as @_autochain '
+            raise ValueError(f'Method "{fn.__name__}()" is marked as @_partial '
                              f'but the expected implementation "{fname}()" was not provided '
                              f'by {self.__class__.__name__}')
         func = getattr(self, fname)
@@ -314,6 +372,8 @@ class BaseModel(ABC):
         self.network = miom_network
         self.variables = None
         self.objective = None
+        self._last_start_time = None
+        self.last_solver_time = None
         if previous_step_model is not None:
             self._options = previous_step_model._options
             if miom_network is None:
@@ -340,7 +400,7 @@ class BaseModel(ABC):
     def get_solver_status(self):
         pass
 
-    @_autochain
+    @_partial
     def setup(self, **kwargs):
         """Provide the options for the solver.
 
@@ -381,7 +441,7 @@ class BaseModel(ABC):
         self._options["_min_eps"] = np.sqrt(2*self._options["int_tol"])
         return self._options
 
-    @_autochain
+    @_partial
     def steady_state(self):
         """Add the required constraints for finding steady-state fluxes
 
@@ -393,12 +453,15 @@ class BaseModel(ABC):
         """
         pass
 
-    @_autochain
+    @_partial
     def keep(self, reactions):
         """Force the inclusion of a list of reactions in the solution.
 
         Reactions have to be associated with positive weights in order to
-        keep them in the final solution.
+        keep them in the final solution. Note that once keep() is called,
+        the weights associated to the reactions selected to be kept will
+        not be taken into account, as they will be forced to be kept in
+        the solution.
 
         Args:
             reactions (list): List of reaction names, a binary vector
@@ -432,7 +495,7 @@ class BaseModel(ABC):
                 if r.index in valid_rxn_idx]
         return dict(idxs=idxs, valid_rxn_idx=valid_rxn_idx)
 
-    @_autochain
+    @_partial
     def subset_selection(self, rxn_weights, eps=1e-2):
         """Transform the current model into a subset selection problem.
 
@@ -441,7 +504,9 @@ class BaseModel(ABC):
         state constraints and/or additional constraints on fluxes, and maximizing
         the weighted sum of the (absolute) weights for the successfully selected reactions
         (with positive weights) and the successfully removed reactions (with negative
-        weights)
+        weights). Selected reactions are forced to have an absolute flux value greater 
+        or equal to the threshold `eps` (1e-2 by default). Removed reactions should have a
+        flux equal to 0.
 
         Each reaction is associated with a weight (positive or negative) provided
         in the parameter `rxn_weights`, and the objective is to select the reactions 
@@ -454,11 +519,12 @@ class BaseModel(ABC):
         where $x_i$ are the indicator variables for the reactions $i$ and $w_i$ are
         the weights for the reactions associated to the indicator variable. Indicator
         variables are automatically created for each reaction associated to a non-zero
-        weight. Two (mutually exclusive) indicator variables are used for positive weighted reactions 
-        that are reversible to indicate whether there is positive or negative flux 
+        weight. Two (mutually exclusive) indicator variables are used for positive weighted 
+        reactions that are reversible to indicate whether there is positive or negative flux 
         through the reaction. A single indicator variable is created for positive weighted
-        non-reversible reactions, to indicate if the reaction is selected (has a non-zero flux)
-        in which case the indicator variable is 1, or 0 otherwise. 
+        non-reversible reactions, to indicate if the reaction is selected (has a non-zero 
+        flux greater or equal to `eps`) in which case the indicator variable is 1, 
+        or 0 otherwise. 
         
         A single binary indicator variable is also created for negative weighted reactions, 
         indicating whether the reaction was not selected (i.e, has 0 flux, in which case the
@@ -476,7 +542,8 @@ class BaseModel(ABC):
         # Calculate min valid EPS based on integrality tolerance
         min_eps = self._options["_min_eps"]
         if eps < min_eps:
-            warnings.warn(f"The minimum epsilon value is {min_eps}, which is less than {eps}.")
+            warnings.warn(f"The minimum epsilon value for the current solver \
+                parameters is {min_eps}, which is less than {eps}.")
         eps = max(eps, min_eps)
         if not isinstance(rxn_weights, Iterable):
             rxn_weights = [rxn_weights] * self.network.num_reactions
@@ -488,7 +555,7 @@ class BaseModel(ABC):
             warnings.warn("Indicator variables were already assigned")
             return False
 
-    @_autochain
+    @_partial
     def set_flux_bounds(self, rxn_id, min_flux=None, max_flux=None):
         """Change the flux bounds of a reaction.
 
@@ -503,7 +570,7 @@ class BaseModel(ABC):
         i, _ = self.network.find_reaction(rxn_id)
         return i
 
-    @_autochain
+    @_partial
     def add_constraints(self, constraints):
         """Add a list of constraint to the model
 
@@ -518,11 +585,18 @@ class BaseModel(ABC):
             self.add_constraint(c)
         return len(constraints) > 0
 
-    @_autochain
+    @_partial
     def add_constraint(self, constraint):
+        """Add a specific constraint to the model.
+
+        The constraint should use existing variables already included in the model.
+
+        Args:
+            constraint: affine expression using model's variables.
+        """
         pass
 
-    @_autochain
+    @_partial
     def set_objective(self, cost_vector, variables, direction='max'):
         """Set the optmization objective of the model.
 
@@ -581,7 +655,7 @@ class BaseModel(ABC):
         self.add_constraint(self.variables.fluxes[i] <= ub)
         return self
 
-    @_autochain
+    @_partial
     def reset(self):
         """Resets the original problem (removes all modifications)
 
@@ -623,6 +697,12 @@ class BaseModel(ABC):
                 raise ValueError("The model does not contain indicator variables. "
                                  "You need to transform it to a subset selection problem "
                                  "by invoking subset_selection() first.")
+        elif extraction_mode == ExtractionMode.REACTION_ACTIVITY:
+            variables = self.variables.reaction_activity
+            if variables is None:
+                raise ValueError("The model does not contain reaction activity variables. "
+                                 "You need to transform it to a subset selection problem "
+                                 "by invoking subset_selection() first.")
         else:
             raise ValueError("Invalid extraction mode")
 
@@ -645,7 +725,7 @@ class BaseModel(ABC):
         S_sub = S_sub[act_met, :]
         return MiomNetwork(S_sub, R_sub, M_sub)
 
-    @_autochain
+    @_partial
     def select_subnetwork(
             self,
             mode=ExtractionMode.ABSOLUTE_FLUX_VALUE,
@@ -683,6 +763,7 @@ class BaseModel(ABC):
                 called)
         """
         return self.variables.values()
+        
 
     def get_fluxes(self, reactions=None):
         """Get the flux values.
@@ -706,11 +787,18 @@ class BaseModel(ABC):
         else:
             raise ValueError("reactions should be an iterable of strings or a single string")
 
-    @_autochain
+    @_partial
     def solve(self, verbosity=None, max_seconds=None):
-        pass
+        """Solve the current model and assign the values to the variables of the model.
 
-    @_autochain
+        Args:
+            verbosity (int, optional): Level of verbosity for the solver. 
+                Values above 0 will force the backend to show output information of the search. Defaults to None.
+            max_seconds (int, optional): Max time in seconds for the search. Defaults to None.
+        """
+        self._last_start_time = perf_counter()
+
+    @_partial
     def copy(self):
         pass
 
@@ -781,11 +869,16 @@ class PicosModel(BaseModel):
     def _solve(self, **kwargs):
         max_seconds = kwargs["max_seconds"] if "max_seconds" in kwargs else None
         verbosity = kwargs["verbosity"] if "verbosity" in kwargs else None
+        init_max_seconds = self.problem.options["timelimit"]
+        init_verbosity = self.problem.options["verbosity"]
         if max_seconds is not None:
             self.problem.options["timelimit"] = max_seconds
         if verbosity is not None:
             self.problem.options["verbosity"] = verbosity
         self.solutions = self.problem.solve()
+        self.problem.options["timelimit"] = init_max_seconds
+        self.problem.options["verbosity"] = init_verbosity
+        self.last_solver_time = perf_counter() - self._last_start_time
         return True
 
     def _add_constraint(self, constraint, **kwargs):
@@ -817,11 +910,11 @@ class PicosModel(BaseModel):
         return PicosModel(previous_step_model=self)
 
     def get_solver_status(self):
-        solver_status = {}
-        solver_status['status'] = str(self.solutions.claimedStatus)
-        solver_status['objective_value'] = float(self.problem.value)
-        solver_status['solver_time_seconds'] = self.solutions.searchTime
-        return solver_status
+        return {
+            "status": self.solutions.claimedStatus,
+            "objective_value": self.problem.value,
+            "elapsed_seconds": self.last_solver_time
+        }
 
 
 class PythonMipModel(BaseModel):
@@ -882,7 +975,7 @@ class PythonMipModel(BaseModel):
         if max_flux is not None:
             self.variables.fluxes[i].ub = max_flux
 
-    def _subset_selection(self, rxn_weights, **kwargs):
+    def _subset_selection(self, *args, **kwargs):
         eps = kwargs["eps"]
         weighted_rxns = self.variables.assigned_reactions
         P = self.problem
@@ -907,9 +1000,12 @@ class PythonMipModel(BaseModel):
     def _solve(self, **kwargs):
         max_seconds = kwargs["max_seconds"] if "max_seconds" in kwargs else 10 * 60
         verbosity = kwargs["verbosity"] if "verbosity" in kwargs else None
+        init_verbosity = self.problem.verbose
         if verbosity is not None:
             self.setup(verbosity=verbosity)
         solutions = self.problem.optimize(max_seconds=max_seconds)
+        self.setup(verbosity=init_verbosity)
+        self.last_solver_time = perf_counter() - self._last_start_time
         return True
 
     def _add_constraint(self, constraint, **kwargs):
@@ -947,8 +1043,12 @@ class PythonMipModel(BaseModel):
         return PythonMipModel(previous_step_model=self)
 
     def get_solver_status(self):
-        solver_status = {}
-        solver_status['status'] = str(self.problem.status.name)
-        solver_status['objective_value'] = float(self.problem.objective_value)
-        solver_status['solver_time_seconds'] = self.problem.search_progress_log.log[-1:][0][0]
-        return solver_status
+        #solver_status['elapsed_seconds'] = self.problem.search_progress_log.log[-1:][0][0]
+        return {
+            "status": _STATUS_MAPPING[self.problem.status] \
+                if self.problem.status in _STATUS_MAPPING \
+                     else pc.modeling.solution.PS_UNKNOWN,
+            "objective_value": self.problem.objective_value,
+            "elapsed_seconds": self.last_solver_time
+        }
+

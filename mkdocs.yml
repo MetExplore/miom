@@ -8,8 +8,14 @@ copyright: Copyright &copy; 2021 INRAE Toxalim
 theme:
     name: material
     custom_dir: docs/overrides
+    features:
+      - navigation.instant
 plugins:
 - search
+- minify:
+    minify_html: true
+    htmlmin_opts:
+        remove_comments: true
 - mkdocstrings:
     handlers:
       python:
@@ -31,6 +37,8 @@ extra:
   analytics:
     provider: google
     property: G-5SV6WE1KMZ
+  version:
+    provider: mike
 extra_javascript:
   - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
