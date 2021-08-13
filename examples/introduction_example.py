@@ -30,5 +30,7 @@ V, X = (model
         # Get continuos vars (fluxes) and binary vars
         .get_values())
 
-print("Number of reactions with non-zero flux:", sum(abs(V) > 1e-8))
+print("Number of reactions with an absolute flux value above 1e-8:", sum(abs(V) > 1e-8))
+print("Active reactions:", sum(1 if activity == 1 else 0 for activity in model.variables.indicator_rxn_activity))
+print("Inconsistencies:", sum(1 if activity != activity else 0 for activity in model.variables.indicator_rxn_activity))
 print("Solver status:", model.get_solver_status())

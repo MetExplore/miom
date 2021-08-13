@@ -120,7 +120,8 @@ class ExtractionMode(str, Enum):
             ```
     """
     ABSOLUTE_FLUX_VALUE = "flux_value",
-    INDICATOR_VALUE = "indicator_value"
+    INDICATOR_VALUE = "indicator_value",
+    REACTION_ACTIVITY = "reaction_activity"
 
 
 class Comparator(str, Enum):
@@ -145,6 +146,7 @@ _RxnVar = NamedTuple(
         ("cost", float),
         ("type", _ReactionType)
     ])
+
 
 def miom(network, solver=Solvers.COIN_OR_CBC):
     """
@@ -184,16 +186,12 @@ def miom(network, solver=Solvers.COIN_OR_CBC):
     else:
         return PicosModel(miom_network=network, solver_name=solver)
 
+
 class _Variables(ABC):
     def __init__(self, flux_vars=None, indicator_vars=None, assigned_reactions=None):
         self._flux_vars = flux_vars
         self._indicator_vars = indicator_vars
         self._assigned_reactions = assigned_reactions
-        self._solver_correspondance = {'CUTOFF':'premature','ERROR':'failure',
-                                        'FEASIBLE':'feasible','INFEASIBLE':'infeasible',
-                                        'INT-INFEASIBLE':'infeasible','LOADED':'detached',
-                                        'NO-SOLUTION-FOUND':'illposed','OPTIMAL':'optimal',
-                                        'UNBOUNDED':'unbounded'}
 
     @property
     def indicators(self):
@@ -214,15 +212,53 @@ class _Variables(ABC):
         pass
 
     @property
+    def reaction_activity(self):
+        """Returns a list indicating whether a reaction is active or not.
+
+        It uses the value of the indicator variables of the subset selection
+        problem to indicate whether a reaction is active (has positive or
+        negative flux, in which case the value is 1 or -1. A value of None 
+        indicates that the reaction has no associated indicator variable. 
+        A value of `nan` indicates that the value of the reaction is 
+        inconsistent after solving the subset selection problem.
+
+        Returns:
+            list: list of the same length as the number of reactions in the model.
+        """
+        activity = [None] * len(self.fluxes)
+        values = self.indicator_values
+        if values is None:
+            raise ValueError("The indicator values are not set. This means that \
+                the problem is not a MIP (subset_selection method was not called). \
+                If you want to select a subset of reactions based on a flux value, \
+                use the method select_subnetwork or obtain_subnetwork instead.")
+        for i, rxn in enumerate(self.assigned_reactions):
+            curr_value = activity[rxn.index]
+            if rxn.type == _ReactionType.RH_POS or rxn.type == _ReactionType.RH_NEG:
+                v = 0 if curr_value is None else curr_value
+                v += values[i]
+                activity[rxn.index] = v
+            elif rxn.type == _ReactionType.RL:
+                if curr_value is not None:
+                    raise ValueError("Multiple indicator variables for the same RL type reaction")
+                activity[rxn.index] = 1 - values[i]
+        # Replace inconsistent values (can happen due to numerical issues)
+        for i in range(len(activity)):
+            if activity[i] is not None and activity[i] > 1:
+                activity[i] = float('nan')
+        # Add sign
+        for i, rxn in enumerate(self.assigned_reactions):
+            if rxn.type == _ReactionType.RH_NEG and values[i] > 0:
+                activity[rxn.index] = -1 * activity[rxn.index]
+        return activity
+
+
+    @property
     def assigned_reactions(self):
         return self._assigned_reactions
 
     def values(self):
         return self.flux_values, self.indicator_values
-
-    @property
-    def solver_correspondance(self):
-        return self._solver_correspondance
 
 
 class _PicosVariables(_Variables):
@@ -265,10 +301,10 @@ class _PythonMipVariables(_Variables):
         return None
 
 
-def _autochain(fn):
+def _partial(fn):
     """Annotation for methods that return the instance itself to enable chaining.
 
-    If a method `my_method` is annotated with @_autochain, a method called `_my_method`
+    If a method `my_method` is annotated with @_partial, a method called `_my_method`
     is expected to be provided by a subclass. Parent method `my_method` is called first
     and the result is passed to the child method `_my_method`.
 
@@ -287,7 +323,7 @@ def _autochain(fn):
         # Find subclass implementation
         fname = '_' + fn.__name__
         if not hasattr(self, fname):
-            raise ValueError(f'Method "{fn.__name__}()" is marked as @_autochain '
+            raise ValueError(f'Method "{fn.__name__}()" is marked as @_partial '
                              f'but the expected implementation "{fname}()" was not provided '
                              f'by {self.__class__.__name__}')
         func = getattr(self, fname)
@@ -364,7 +400,7 @@ class BaseModel(ABC):
     def get_solver_status(self):
         pass
 
-    @_autochain
+    @_partial
     def setup(self, **kwargs):
         """Provide the options for the solver.
 
@@ -405,7 +441,7 @@ class BaseModel(ABC):
         self._options["_min_eps"] = np.sqrt(2*self._options["int_tol"])
         return self._options
 
-    @_autochain
+    @_partial
     def steady_state(self):
         """Add the required constraints for finding steady-state fluxes
 
@@ -417,7 +453,7 @@ class BaseModel(ABC):
         """
         pass
 
-    @_autochain
+    @_partial
     def keep(self, reactions):
         """Force the inclusion of a list of reactions in the solution.
 
@@ -459,7 +495,7 @@ class BaseModel(ABC):
                 if r.index in valid_rxn_idx]
         return dict(idxs=idxs, valid_rxn_idx=valid_rxn_idx)
 
-    @_autochain
+    @_partial
     def subset_selection(self, rxn_weights, eps=1e-2):
         """Transform the current model into a subset selection problem.
 
@@ -519,7 +555,7 @@ class BaseModel(ABC):
             warnings.warn("Indicator variables were already assigned")
             return False
 
-    @_autochain
+    @_partial
     def set_flux_bounds(self, rxn_id, min_flux=None, max_flux=None):
         """Change the flux bounds of a reaction.
 
@@ -534,7 +570,7 @@ class BaseModel(ABC):
         i, _ = self.network.find_reaction(rxn_id)
         return i
 
-    @_autochain
+    @_partial
     def add_constraints(self, constraints):
         """Add a list of constraint to the model
 
@@ -549,7 +585,7 @@ class BaseModel(ABC):
             self.add_constraint(c)
         return len(constraints) > 0
 
-    @_autochain
+    @_partial
     def add_constraint(self, constraint):
         """Add a specific constraint to the model.
 
@@ -560,7 +596,7 @@ class BaseModel(ABC):
         """
         pass
 
-    @_autochain
+    @_partial
     def set_objective(self, cost_vector, variables, direction='max'):
         """Set the optmization objective of the model.
 
@@ -619,7 +655,7 @@ class BaseModel(ABC):
         self.add_constraint(self.variables.fluxes[i] <= ub)
         return self
 
-    @_autochain
+    @_partial
     def reset(self):
         """Resets the original problem (removes all modifications)
 
@@ -683,7 +719,7 @@ class BaseModel(ABC):
         S_sub = S_sub[act_met, :]
         return MiomNetwork(S_sub, R_sub, M_sub)
 
-    @_autochain
+    @_partial
     def select_subnetwork(
             self,
             mode=ExtractionMode.ABSOLUTE_FLUX_VALUE,
@@ -721,6 +757,7 @@ class BaseModel(ABC):
                 called)
         """
         return self.variables.values()
+        
 
     def get_fluxes(self, reactions=None):
         """Get the flux values.
@@ -744,7 +781,7 @@ class BaseModel(ABC):
         else:
             raise ValueError("reactions should be an iterable of strings or a single string")
 
-    @_autochain
+    @_partial
     def solve(self, verbosity=None, max_seconds=None):
         """Solve the current model and assign the values to the variables of the model.
 
@@ -755,7 +792,7 @@ class BaseModel(ABC):
         """
         self._last_start_time = perf_counter()
 
-    @_autochain
+    @_partial
     def copy(self):
         pass
 

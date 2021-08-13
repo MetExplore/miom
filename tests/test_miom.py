@@ -63,7 +63,6 @@ def test_subset_selection(model):
         .solve()
         .get_values()
     )
-    # Indicator variables (X) should contain...
     assert np.sum(X) == model.network.num_reactions - 6
 
 def test_network_selection_using_indicators(model):
@@ -127,8 +126,8 @@ def test_subset_selection_custom_weights(model):
     c = [-100] * model.network.num_reactions
     # Positive weight only for R_f_i. Should not be selected
     # based on the objective function and the steady state constraints
-    i, _ = model.network.find_reaction('R_f_i')
-    c[i] = 1
+    #i, _ = model.network.find_reaction('R_f_i')
+    c[model.network.get_reaction_id('R_f_i')] = 1
     V, X = (
         prepare_fba(model)
         .subset_selection(c)
@@ -144,12 +143,26 @@ def test_subset_selection_custom_weights(model):
     # selected.
     assert np.sum(X > 0.99) == np.sum(np.array(c) < 0)
 
+def test_activity_values(model):
+    # Same problem as above, but now we use the activity values instead
+    c = [-100] * model.network.num_reactions
+    c[model.network.get_reaction_id('R_f_i')] = 1
+    V, X = (
+        prepare_fba(model)
+        .subset_selection(c)
+        .solve()
+        .get_values()
+    )
+    active = sum(1 if abs(activity) == 1 else 0 for activity in model.variables.reaction_activity)
+    inconsistent = sum(1 if activity != activity else 0 for activity in model.variables.reaction_activity)
+    assert active == 0 and inconsistent == 0
+
 def test_keep_rxn(model):
     # Large negative values
     c = [-100] * model.network.num_reactions
     # Positive weight only for R_f_i. Should not be selected
     # based on the objective function and the steady state constraints
-    i, _ = model.network.find_reaction('R_f_i')
+    i = model.network.get_reaction_id('R_f_i')
     c[i] = 1
     V, X = (
         prepare_fba(model)
