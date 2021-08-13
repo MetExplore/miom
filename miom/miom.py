@@ -697,6 +697,12 @@ class BaseModel(ABC):
                 raise ValueError("The model does not contain indicator variables. "
                                  "You need to transform it to a subset selection problem "
                                  "by invoking subset_selection() first.")
+        elif extraction_mode == ExtractionMode.REACTION_ACTIVITY:
+            variables = self.variables.reaction_activity
+            if variables is None:
+                raise ValueError("The model does not contain reaction activity variables. "
+                                 "You need to transform it to a subset selection problem "
+                                 "by invoking subset_selection() first.")
         else:
             raise ValueError("Invalid extraction mode")
 
