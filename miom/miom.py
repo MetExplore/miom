@@ -867,11 +867,11 @@ class PicosModel(BaseModel):
         return PicosModel(previous_step_model=self)
 
     def get_solver_status(self):
-        solver_status = {}
-        solver_status['status'] = str(self.solutions.claimedStatus)
-        solver_status['objective_value'] = float(self.problem.value)
-        solver_status['solver_time_seconds'] = self.solutions.searchTime
-        return solver_status
+        return {
+            "status": self.solutions.claimedStatus,
+            "objective_value": self.problem.value,
+            "elapsed_seconds": self.last_solver_time
+        }
 
 
 class PythonMipModel(BaseModel):
