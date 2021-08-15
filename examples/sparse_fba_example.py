@@ -30,7 +30,7 @@ V, X = (miom
         .solve(verbosity=1)
         .get_values())
 
-# Show reactions with a flux > 1e-7
+# Show reactions with a flux > 1e-8
 print("Number of reactions with flux above +/- 1e-8:", sum(abs(V)>1e-8))
 
 # Count reactions with an indicator value of 0 (active). Note that since
