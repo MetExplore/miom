@@ -1,7 +1,7 @@
 import miom
 
 # Load a model
-m = miom.mio.load_gem('https://github.com/pablormier/miom-gems/raw/main/gems/mus_musculus_iMM1865.miom')
+m = miom.mio.load_gem('@mus_musculus_iMM1865.miom')
 print("Num. of reactions in the network:", m.num_reactions)
 
 # Solve with Gurobi, CPLEX or CBC (other MIP solvers struggle with mediudm/large networks)

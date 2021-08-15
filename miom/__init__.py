@@ -6,4 +6,4 @@ from miom.miom import (
 )
 
 __all__ = ["load", "Solvers", "Comparator", "ExtractionMode"]
-__version__ = "0.9.0-beta.0"
+__version__ = "0.9.0-beta.1"
