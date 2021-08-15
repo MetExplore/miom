@@ -1,7 +1,7 @@
 import miom
 
 # Load a model
-m = miom.mio.load_gem('https://github.com/pablormier/miom-gems/raw/main/gems/mus_musculus_iMM1865.miom')
+m = miom.mio.load_gem('@mus_musculus_iMM1865.miom')
 print("Num. of reactions in the network:", m.num_reactions)
 
 # Solve with Gurobi, CPLEX or CBC (other MIP solvers struggle with mediudm/large networks)
@@ -30,7 +30,7 @@ V, X = (miom
         .solve(verbosity=1)
         .get_values())
 
-# Show reactions with a flux > 1e-7
+# Show reactions with a flux > 1e-8
 print("Number of reactions with flux above +/- 1e-8:", sum(abs(V)>1e-8))
 
 # Count reactions with an indicator value of 0 (active). Note that since

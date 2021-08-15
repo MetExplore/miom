@@ -2,7 +2,7 @@ import miom
 import numpy as np
 
 # Load a model
-m = miom.mio.load_gem('https://github.com/pablormier/miom-gems/raw/main/gems/homo_sapiens_human1_fcm.miom')
+m = miom.mio.load_gem('@homo_sapiens_human1_fcm.miom')
 print("Reactions in the consistent iHuman GEM:", m.num_reactions)
 core_rxn = m.find_reactions_from_pathway("Cholesterol metabolism")
 print("Num. of core reactions:", sum(core_rxn))

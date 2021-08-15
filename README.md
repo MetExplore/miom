@@ -1,5 +1,5 @@
 # Introduction
-[![Run In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1JAOEHLlRCW8GziIpBqkFwJL2ha3OEOWJ?usp=sharing)
+[![Try It Online](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1JAOEHLlRCW8GziIpBqkFwJL2ha3OEOWJ?usp=sharing)
 [![PyPI version](https://badge.fury.io/py/miom.svg)](https://badge.fury.io/py/miom)
 ![Tests](https://github.com/metexplore/miom/actions/workflows/unit-tests.yml/badge.svg)
 
@@ -9,13 +9,38 @@ __MIOM__ (Mixed Integer Optimization for Metabolism) is a python library for cre
 
 MIOM offers a high-level API that leverages the power of modern Mixed Integer Optimization (MIO) solvers to easily define steady-state metabolic optimization problems, from simple Flux Balance Analysis (FBA) simulations, to more complex problems, such as sparse FBA or context-specific reconstruction problems, and solve them the __required level of optimality__.
 
-Most of the time, algorithms formulated as Mixed Integer Optimization problems with MIOM can be solved faster and with better quality than currently existing alternatives that are approximations of the original problem. By using the MIO formulation, you can get also an estimation of how close to optimality a solution is, so you don't need to waste more time than needed.
-
 MIOM uses the [PICOS](https://picos-api.gitlab.io/picos/) and the [Python-MIP](https://www.python-mip.com/) libraries to build and solve the optimization problems using many commercial, academic and free solvers. It is also compatible and complementary to [cobrapy](https://opencobra.github.io/cobrapy/).
+
+Here is an example of how to implement FBA and Sparse FBA to maximize flux through the biomass reaction in the Recon3D model with MIOM:
+
+```python
+import miom
+
+model = (miom
+        .load('@BiGG/Recon3D.miom')
+        .steady_state()
+        .set_rxn_objective('biomass_reaction')
+        .solve(verbosity=1))
+
+print("Optimal flux:", model.get_fluxes('biomass_reaction'))
+print("Number of active reactions:", sum(abs(model.get_fluxes()) > 1e-8))
+
+# Minimize the number of reactions preserving the optimal flux
+V, X = (model
+        .setup(opt_tol=0.05)
+        .set_fluxes_for('biomass_reaction')
+        .subset_selection(-1)
+        .solve(verbosity=1)
+        .get_values())
+
+print("Number of active reactions:", sum(abs(V) > 1e-8))
+```
 
 > NOTE: This library is functional but still in a very early stage. API is still not stable and might be changed in future versions.
 
 ## Installation
+
+### Minimal install
 
 By default, MIOM comes with support for COIN-OR CBC solver and GLPK using the swiglpk wrapper. To install MIOM with minimal dependencies, run:
 
@@ -23,32 +48,49 @@ By default, MIOM comes with support for COIN-OR CBC solver and GLPK using the sw
 pip install miom
 ```
 
-You can also install it with the following command to include the interfaces for [Gurobi](https://www.gurobi.com/downloads) and [Mosek](https://www.mosek.com/downloads/):
+### Full install
+
+The full install option of `miom` comes also with the interfaces for [Gurobi](https://www.gurobi.com/downloads) and [Mosek](https://www.mosek.com/downloads/). Also, in order to be able to import metabolic networks in different formats (SBML, Matlab, YAML, etc), you need to install the additional `cobra` and `scipy` packages:
 
 ```
-pip install miom[all]
+pip install miom[all] cobra scipy
 ```
 
-CPLEX is also supported, but requires a license. To install MIOM with CPLEX support, follow the instructions on the [CPLEX page](https://www.ibm.com/docs/en/icos/12.8.0.0?topic=cplex-setting-up-python-api).
+CPLEX is also supported, but requires a valid license. To install MIOM with CPLEX support, follow the instructions on the [CPLEX page](https://www.ibm.com/docs/en/icos/12.8.0.0?topic=cplex-setting-up-python-api) to install your current version of cplex in your python environment.
 
 
-## A quick example
+## Quick start
+
+The first step is to import a GEM (a genome-scale model) using the `miom.mio.load_gem` method. The method accepts a local file or an URL. SBML files and Matlab files are supported through `cobra` and `scipy` packages. Please make sure that these packages are correctly installed before trying to import models in these formats (see [Full install](#full-install)).
+
+Once these packages are available, you can import a model using:
+
+```python
+import miom
+network = miom.mio.load_gem("https://github.com/SysBioChalmers/Human-GEM/raw/main/model/Human-GEM.mat")
+print("Number of reactions in the network", network.num_reactions)
+```
+
+MIOM includes its own lightweight and portable format (.miom) for loading and storing metabolic networks, which does not require any additional dependency. This models uses `numpy` compressed structured arrays to store the basic information of the metabolic networks required for performing simulations. This format is even smaller and more portable than the Matlab files. A repository of converted models is available at https://github.com/pablormier/miom-gems.
+
+To make things even easier, the method `load_gem` can import any model from this repository using the relative path, for example:
+
+```python
+human1 = miom.mio.load_gem("@SysBioChalmers/Human-GEM.miom")
+recon3d = miom.mio.load_gem("@BiGG/Human-GEM.miom")
+```
 
 Here is an example of how to load a metabolic network and maximize the flux through a target reaction using FBA, and then how to modify the original problem to implement the sparse FBA problem adding only a few lines to the original problem:
 
 ```python
-from miom import miom, load_gem, Solvers
+import miom
 
-# Load a genome-scale metabolic network using the miom format. 
-# You can load SMBL or Matlab metabolic networks as well using 
-# the same method, but it requires to have the cobratoolbox python library
-# installed (and scipy for mat files). To install these dependencies, run:
-# $ pip install cobra scipy
-network = load_gem("https://github.com/pablormier/miom-gems/raw/main/gems/mus_musculus_iMM1865.miom")
+network = miom.mio.load_gem("@mus_musculus_iMM1865.miom")
 target_rxn = "BIOMASS_reaction"
 
 # Create the optimization problem with miom and solve
-model = (miom(network)
+model = (miom
+        .load(network)
         .steady_state()
         .set_rxn_objective(target_rxn)
         .solve(verbosity=1))
@@ -56,7 +98,7 @@ model = (miom(network)
 print("Optimal flux:", model.get_fluxes(target_rxn), "mmol/(h·gDW)")
 
 # Show reactions with non-zero flux
-V, _ = model.get_values()
+V, X = model.get_values()
 print("Number of reactions active reactions:", sum(abs(V) > 1e-8))
 ```
 
@@ -103,18 +145,15 @@ Cbc0035I Maximum depth 0, 0 variables fixed on reduced cost
 Total time (CPU seconds):       60.79   (Wallclock seconds):       60.79
 ```
 
-The concise API provided by MIOM makes everything explicit: the sparse FBA problem can be implemented as a best subset selection problem of reactions (minimize the number of reactions with non-zero flux)
-subject to the steady-state constraint and the optimality constraint of the flux for the target
-reaction (in this case the `BIOMASS_reaction`). Using this formulation, you can take advantage of
-modern solvers like CPLEX, GUROBI, MOSEK, COIN-OR CBC (among others) to obtain an optimal or an
-approximate solution, controlled by the `opt_tol` parameter.
+The concise API provided by MIOM makes everything explicit: the sparse FBA problem can be implemented as a best subset selection problem of reactions (minimize the number of reactions with non-zero flux) subject to the steady-state constraint and the optimality constraint of the flux for the target reaction (in this case the `BIOMASS_reaction`). Using this formulation, you can take advantage of modern solvers like CPLEX, GUROBI, MOSEK, COIN-OR CBC (among others) to obtain an optimal or an approximate solution, controlled by the `opt_tol` parameter.
 
 To use other solvers, you only need to provide the specific solver to the `miom` method, for example:
 
 ```python
-model = (miom(network, solver=Solvers.GLPK)
+model = (miom
+        .load('@BiGG/Recon3D.miom', solver=miom.Solvers.GLPK)
         .steady_state()
-        .set_rxn_objective(target_rxn)
+        .set_rxn_objective('biomass_reaction')
         .solve(verbosity=1))
 ```
 

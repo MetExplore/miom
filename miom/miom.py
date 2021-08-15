@@ -180,6 +180,8 @@ def load(network, solver=Solvers.COIN_OR_CBC):
             used, or a PicosModel otherwise.
     """
     solver = str(solver.value) if isinstance(solver, Enum) else str(solver)
+    if isinstance(network, str):
+        network = load_gem(network)
     if solver == 'cbc':
         return PythonMipModel(miom_network=network, solver_name=solver)
     if solver == 'gurobi_pymip':

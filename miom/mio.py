@@ -4,6 +4,34 @@ import pathlib
 from urllib.parse import urlparse
 from numbers import Number
 
+# Default repository for loading miom models
+DEFAULT_REPOSITORY = "https://github.com/pablormier/miom-gems/raw/main/gems/"
+
+
+def _is_url(url):
+    """
+    Determine if the provided string is a valid url
+    :param url: string
+    :return: True if the string is a URL
+    """
+    if isinstance(url, str):
+        try:
+            result = urlparse(url)
+            return all([result.scheme, result.netloc])
+        except ValueError:
+            return False
+    return False
+
+
+def set_repository(url):
+    if not _is_url(url):
+        raise ValueError("The default repository has to be a valid URL")
+    global DEFAULT_REPOSITORY
+    if not url.endswith('/'):
+        url += '/'
+    DEFAULT_REPOSITORY = url
+
+
 class MiomNetwork:
     """A minimal class to store a metabolic network.
 
@@ -73,23 +101,6 @@ class MiomNetwork:
         return bytes / 1024**2
 
 
-
-
-def _is_url(url):
-    """
-    Determine if the provided string is a valid url
-    :param url: string
-    :return: True if the string is a URL
-    """
-    if isinstance(url, str):
-        try:
-            result = urlparse(url)
-            return all([result.scheme, result.netloc])
-        except ValueError:
-            return False
-    return False
-
-
 def _download(url_file):
     if not _is_url(url_file):
         raise ValueError("Invalid url")
@@ -112,7 +123,9 @@ def load_gem(model_or_path):
     need both cobrapy and scipy installed.
     
     Args:
-        model_or_path (str): Path to a local file or URL pointing to the metabolic network
+        model_or_path (str): Path to a local file or URL pointing to the metabolic network.
+            If the string starts with '@', the file will be loaded from the default github
+            repository.
 
     Returns:
         MiomNetwork: A [MiomNetwork][miom.mio] instance with the minimal information 
@@ -122,7 +135,9 @@ def load_gem(model_or_path):
     """
     if isinstance(model_or_path, str):
         file = model_or_path
-        if _is_url(model_or_path):
+        if model_or_path.startswith("@"):
+            file = _download(DEFAULT_REPOSITORY + model_or_path[1:])
+        elif _is_url(model_or_path):
             file = _download(model_or_path)
         ext = pathlib.Path(file).suffix
         if ext == '.miom' or ext == '.xz' or ext == '.npz':
@@ -180,23 +195,23 @@ def _cobra_to_miom(model):
     rxn_data = [(rxn.id, rxn.lower_bound, rxn.upper_bound, rxn.subsystem, rxn.gene_reaction_rule)
                 for rxn in model.reactions]
     met_data = [(met.id, met.name, met.formula) for met in model.metabolites]
-    id_max_length = max(len(rxn.id) for rxn in model.reactions)
-    subsyst_max_length = max((len(rxn.subsystem)) for rxn in model.reactions)
-    metid_max_length = max((len(met.id)) for met in model.metabolites)
-    metname_max_length = max((len(met.name)) for met in model.metabolites)
-    metform_max_length = max((len(met.formula) if met.formula is not None else 0) for met in model.metabolites)
-    gpr_max_length = max(len(rxn.gene_reaction_rule) for rxn in model.reactions)
+    #id_max_length = max(len(rxn.id) for rxn in model.reactions)
+    #subsyst_max_length = max((len(rxn.subsystem)) for rxn in model.reactions)
+    #metid_max_length = max((len(met.id)) for met in model.metabolites)
+    #metname_max_length = max((len(met.name)) for met in model.metabolites)
+    #metform_max_length = max((len(met.formula) if met.formula is not None else 0) for met in model.metabolites)
+    #gpr_max_length = max(len(rxn.gene_reaction_rule) for rxn in model.reactions)
     R = np.array(rxn_data, dtype=[
-        ('id', f"<U{id_max_length}"),
+        ('id', 'object'),
         ('lb', 'float'),
         ('ub', 'float'),
-        ('subsystem', f"<U{subsyst_max_length}"),
-        ('gpr', f"<U{gpr_max_length}")
+        ('subsystem', 'object'),
+        ('gpr', 'object')
     ])
     M = np.array(met_data, dtype=[
-        ('id', f"<U{metid_max_length}"),
-        ('name', f"<U{metname_max_length}"),
-        ('formula', f"<U{metform_max_length}")
+        ('id', 'object'),
+        ('name', 'object'),
+        ('formula', 'object')
     ])
     return MiomNetwork(S, R, M)
 
@@ -215,21 +230,8 @@ def _load_compressed_model(url_or_filepath):
         import lzma
         from io import BytesIO
         with lzma.open(file, 'rb') as f_in:
-            M = np.load(BytesIO(f_in.read()))
+            M = np.load(BytesIO(f_in.read()), allow_pickle=True)
     else:
         M = np.load(file)
     return MiomNetwork(M['S'], M['reactions'], M['metabolites'])
 
-
-if __name__ == '__main__':
-    import argparse
-    parser = argparse.ArgumentParser(description='Export cobrapy models')
-    parser.add_argument('in_file', type=str, help='URL or input file (a .xml, .json, .yml, .mat model)')
-    parser.add_argument('out_file', type=str, help='Output file (a npz.xz compressed file)')
-    args = parser.parse_args()
-    print("Exporting", args.in_file, "to", args.out_file)
-    _export_cobra_model(args.in_file, args.out_file)
-    print("Verifying...")
-    m = _load_compressed_model(args.out_file)
-    print(m.S.shape, m.R.shape, m.M.shape)
-    print("Done")
