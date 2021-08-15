@@ -18,7 +18,7 @@ RL = -1 * m.find_reactions_from_pathway("Pyruvate metabolism")
 w = RH + RL
 print("RH:", sum(RH), "RL:", sum(abs(RL)))
 
-m = (miom(m, solver=Solvers.GUROBI)
+m = (miom(m, solver=Solvers.COIN_OR_CBC)
      .setup(int_tol=1e-8, opt_tol=0.01, verbosity=1)
      .steady_state()
      .subset_selection(w)
@@ -29,5 +29,5 @@ m = (miom(m, solver=Solvers.GUROBI)
           value=1e-8
      )
      .network)
-print(m.num_reactions)
+print("Number of reactions in the subnetwork with active flux:", m.num_reactions)
 

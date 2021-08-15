@@ -5,11 +5,9 @@
 
 
 
-__MIOM__ (Mixed Integer Optimization for Metabolism) is a python library for creating and solving complex optimization problems using genome-scale metabolic networks, in just a few lines. 
+__MIOM__ (Mixed Integer Optimization for Metabolism) is a python library for creating and solving complex constraint-based optimization problems for metabolism, in just a few lines. 
 
 By leveraging the power of modern Mixed Integer Optimization (MIO) solvers, it can transform any simple constraint-based problem, such as Flux Balance Analysis (FBA) into a more complex optimization problem, such as sparse FBA or context-specific reconstruction problems very easily, and solve it with the __required level of optimality__.
-
-But what is even better is that most of the time, algorithms formulated as Mixed Integer Optimization problems with MIOM can be solved faster and with better quality than currently existing alternatives that are approximations of the original problem. By using the MIO formulation, you can get also an estimation of how close to optimality a solution is, so you don't need to waste more time than needed.
 
 MIOM uses the [PICOS](https://picos-api.gitlab.io/picos/) and the [Python-MIP](https://www.python-mip.com/) libraries to build and solve the optimization problems using many commercial, academic and free solvers.
 
@@ -37,17 +35,18 @@ CPLEX is also supported, but requires a license. To install MIOM with CPLEX supp
 Here is an example of how to load a metabolic network and maximize the flux through a target reaction using FBA, and then how to modify the original problem to implement the sparse FBA problem adding only a few lines to the original problem:
 
 ```python
-from miom import miom, load_gem, Solvers
+import miom
 
 # Load a genome-scale metabolic network using the miom format. 
 # You can load SMBL or Matlab metabolic networks as well using 
 # the same method, but it requires to have the cobratoolbox python library
 # installed (and scipy for mat files). To install these dependencies, run:
 # $ pip install cobra scipy
-network = load_gem("https://github.com/pablormier/miom-gems/raw/main/gems/mus_musculus_iMM1865.miom")
+network = miom.mio.load_gem("https://github.com/pablormier/miom-gems/raw/main/gems/mus_musculus_iMM1865.miom")
 target_rxn = "BIOMASS_reaction"
 # Create the optimization problem with miom and solve
-model = (miom(network)
+model = (miom
+        .load(network)
         .steady_state()
         .set_rxn_objective(target_rxn)
         .solve(verbosity=1))
@@ -109,7 +108,8 @@ approximate solution, controlled by the `opt_tol` parameter.
 To use other solvers, you only need to provide the specific solver to the `miom` method, for example:
 
 ```python
-model = (miom(network, solver=Solvers.GLPK)
+model = (miom
+        .load(network, solver=Solvers.GLPK)
         .steady_state()
         .set_rxn_objective(target_rxn)
         .solve(verbosity=1))

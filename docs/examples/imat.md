@@ -6,12 +6,10 @@ Example implementation of iMAT using MIOM. Note that this implementation support
     Shlomi, T., Cabili, M. N., Herrgård, M. J., Palsson, B. Ø., & Ruppin, E. (2008). Network-based prediction of human tissue-specific metabolism. [Nature biotechnology, 26(9), 1003-1010](https://www.nature.com/articles/nbt.1487).
 
 ```python
-from miom import miom, Solvers
-from miom.mio import load_gem
-from miom.miom import Comparator, ExtractionMode
+import miom
 
 # Use the iHuman-GEM model
-m = load_gem('https://github.com/pablormier/miom-gems/raw/main/gems/homo_sapiens_human1.miom')
+m = miom.mio.load_gem('https://github.com/pablormier/miom-gems/raw/main/gems/homo_sapiens_human1.miom')
 
 # Add all the reactions from the Cholesterol pathway to the highly expressed set
 RH = m.find_reactions_from_pathway("Cholesterol metabolism")
@@ -20,14 +18,15 @@ RL = -1 * m.find_reactions_from_pathway("Pyruvate metabolism")
 w = RH + RL
 print("RH:", sum(RH), "RL:", sum(abs(RL)))
 
-m = (miom(m, solver=Solvers.GUROBI)
+m = (miom
+     .load(m, solver=miom.Solvers.GUROBI)
      .setup(int_tol=1e-8, opt_tol=0.01, verbosity=1)
      .steady_state()
      .subset_selection(w)
      .solve(max_seconds=30)
      .select_subnetwork(
-          mode=ExtractionMode.ABSOLUTE_FLUX_VALUE,
-          comparator=Comparator.GREATER_OR_EQUAL,
+          mode=miom.ExtractionMode.ABSOLUTE_FLUX_VALUE,
+          comparator=miom.Comparator.GREATER_OR_EQUAL,
           value=1e-8
      )
      .network)

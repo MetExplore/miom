@@ -7,18 +7,19 @@ Toolbox includes different LP heuristics to minimize different approximations of
 Here is the implementation of sparse-FBA with MIOM:
 
 ```python
-from miom import miom, load_gem, Solvers
+import miom
 
 # Load a genome-scale metabolic network. You can load SMBL or Matlab metabolic networks
 # as well using the same method, but it requires to have the cobratoolbox python library
 # installed.
-network = load_gem("https://github.com/pablormier/miom-gems/raw/main/gems/mus_musculus_iMM1865.miom")
+network = miom.mio.load_gem("https://github.com/pablormier/miom-gems/raw/main/gems/mus_musculus_iMM1865.miom")
 
 # Create the sparse FBA problem to get a solution that maximizes
 # the optimal flux through the BIOMASS_reaction minimizing the
 # number of active reactions. The solution should be not more than
 # 5% of the optimal solution (opt_tol = 0.05).
-V, X = (miom(network, solver=Solvers.GUROBI_PYMIP)
+V, X = (miom
+        .load(network, solver=miom.Solvers.GUROBI_PYMIP)
         # Set-up the solver options
         .setup(int_tol=1e-8, opt_tol=0.05, verbosity=1)
         # Add the steady-state constraints (S*V = 0)
@@ -51,7 +52,7 @@ V, X = (miom(network, solver=Solvers.GUROBI_PYMIP)
         .get_values())
 
 # Show reactions with a flux > 1e-7
-print("Number of reactions with flux above +/- 1e-7:", sum(abs(V)>1e-7))
+print("Number of reactions with flux above +/- 1e-8:", sum(abs(V) > 1e-8))
 
 # Count reactions with an indicator value of 0 (active). Note that since
 # the weights of the reactions are negative (for all rxns), an indicator

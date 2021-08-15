@@ -10,13 +10,11 @@ Fastcore defines a set of core reactions that is forced to be active (carry a no
 The Fastcore algorithm is greedy approximation of the exact problem which can be modelled as a MIP problem. With MIOM, the exact problem can be defined in a few lines, using the `opt_tol` parameter to control the level of optimality required:
 
 ```python
-from miom import miom, Solvers
-from miom.mio import load_gem
-from miom.miom import Comparator, ExtractionMode
+import miom
 import numpy as np
 
 # Use the flux-consistent subnetwork (fcm) of the Human1 GEM model 
-m = load_gem('https://github.com/pablormier/miom-gems/raw/main/gems/homo_sapiens_human1_fcm.miom')
+m = miom.mio.load_gem('https://github.com/pablormier/miom-gems/raw/main/gems/homo_sapiens_human1_fcm.miom')
 # Select reactions from the cholesterol metabolism as the core reactions to keep
 core_rxn = m.find_reactions_from_pathway("Cholesterol metabolism")
 print(sum(core_rxn))
@@ -26,18 +24,19 @@ weights = -1 * np.ones(m.num_reactions)
 weights[core_rxn == 1] = 1
 
 # Exact-Fastcore
-fmc = (miom(m, solver=Solvers.GUROBI_PYMIP)
-          .setup(opt_tol=0.01)
-          .steady_state()
-          .subset_selection(weights)
-          .keep(np.where(core_rxn == 1)[0])
-          .solve(verbosity=1)
-          .select_subnetwork(
-               mode=ExtractionMode.ABSOLUTE_FLUX_VALUE,
-               comparator=Comparator.GREATER_OR_EQUAL,
-               value=1e-8
-          )
-          .network
+fmc = (miom
+        .load(m, solver=miom.Solvers.GUROBI_PYMIP)
+        .setup(opt_tol=0.01)
+        .steady_state()
+        .subset_selection(weights)
+        .keep(core_rxn == 1)
+        .solve(verbosity=1)
+        .select_subnetwork(
+            mode=miom.ExtractionMode.ABSOLUTE_FLUX_VALUE,
+            comparator=miom.Comparator.GREATER_OR_EQUAL,
+            value=1e-8
+        )
+        .network
 )
 print(fmc.num_reactions)
 ```
