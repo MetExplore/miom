@@ -1,27 +1,27 @@
-from miom import miom, Solvers
-from miom.mio import load_gem
-from miom.miom import Comparator, ExtractionMode
+import miom
 import numpy as np
 
 # Load a model
-m = load_gem('https://github.com/pablormier/miom-gems/raw/main/gems/homo_sapiens_human1_fcm.miom')
+m = miom.mio.load_gem('https://github.com/pablormier/miom-gems/raw/main/gems/homo_sapiens_human1_fcm.miom')
 print("Reactions in the consistent iHuman GEM:", m.num_reactions)
 core_rxn = m.find_reactions_from_pathway("Cholesterol metabolism")
 print("Num. of core reactions:", sum(core_rxn))
-# Assign a negative weight for reactions not in the core
+
+# Assign a negative weight for reactions not in the core and a positive value
+# for reactions in the core.
 weights = -1 * np.ones(m.num_reactions)
 weights[core_rxn == 1] = 1
 
-# Fastcore
-fmc = (miom(m, solver=Solvers.GUROBI_PYMIP)
+# Weighted Exact Fastcore algorithm with MIOM:
+fmc = (miom.load(m, solver=miom.Solvers.COIN_OR_CBC)
           .setup(opt_tol=0.05)
           .steady_state()
           .subset_selection(weights)
-          .keep(np.where(core_rxn == 1)[0])
+          .keep(core_rxn == 1)
           .solve(verbosity=1)
           .select_subnetwork(
-               mode=ExtractionMode.ABSOLUTE_FLUX_VALUE,
-               comparator=Comparator.GREATER_OR_EQUAL,
+               mode=miom.ExtractionMode.ABSOLUTE_FLUX_VALUE,
+               comparator=miom.Comparator.GREATER_OR_EQUAL,
                value=1e-8
           )
           .network

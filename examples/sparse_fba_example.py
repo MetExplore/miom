@@ -1,11 +1,12 @@
-from miom import miom, load_gem, Solvers
+import miom
 
 # Load a model
-m = load_gem('https://github.com/pablormier/miom-gems/raw/main/gems/mus_musculus_iMM1865.miom')
-print(m.num_reactions)
+m = miom.mio.load_gem('https://github.com/pablormier/miom-gems/raw/main/gems/mus_musculus_iMM1865.miom')
+print("Num. of reactions in the network:", m.num_reactions)
 
 # Solve with Gurobi, CPLEX or CBC (other MIP solvers struggle with mediudm/large networks)
-V, X = (miom(network=m, solver=Solvers.GUROBI_PYMIP)
+V, X = (miom
+        .load(network=m, solver=miom.Solvers.COIN_OR_CBC)
         # Config the solver (e.g. set the optimality tolerance for MIP problems)
         .setup(int_tol=1e-8, opt_tol=0.05)
         # Add steady-state constraints to the model (S * V = 0)
@@ -30,7 +31,7 @@ V, X = (miom(network=m, solver=Solvers.GUROBI_PYMIP)
         .get_values())
 
 # Show reactions with a flux > 1e-7
-print("Number of reactions with flux above +/- 1e-7:", sum(abs(V)>1e-7))
+print("Number of reactions with flux above +/- 1e-8:", sum(abs(V)>1e-8))
 
 # Count reactions with an indicator value of 0 (active). Note that since
 # the weights of the reactions are negative (for all rxns), an indicator

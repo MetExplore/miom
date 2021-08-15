@@ -148,7 +148,7 @@ _RxnVar = NamedTuple(
     ])
 
 
-def miom(network, solver=Solvers.COIN_OR_CBC):
+def load(network, solver=Solvers.COIN_OR_CBC):
     """
     Create a MIOM optimization model for a given solver.
     If the solver is Coin-OR CBC, an instance of PythonMipModel is used
@@ -157,12 +157,13 @@ def miom(network, solver=Solvers.COIN_OR_CBC):
 
     Example:
         Example of how to perform FBA to maximize flux through the
-        BIOMASS_reaction in the iMM1865 model:
+        `BIOMASS_reaction` in the iMM1865 model:
 
         ```python
-        >>> from miom import miom, load_gem
-        >>> network = load_gem("https://github.com/pablormier/miom-gems/raw/main/gems/mus_musculus_iMM1865.miom")
-        >>> V, _ = miom(network)
+        >>> import miom
+        >>> network = miom.mio.load_gem("https://github.com/pablormier/miom-gems/raw/main/gems/mus_musculus_iMM1865.miom")
+        >>> V, X = (miom
+                    .load(network)
                     .steady_state()
                     .set_rxn_objective("BIOMASS_reaction")
                     .solve(verbosity=1)
@@ -480,6 +481,9 @@ class BaseModel(ABC):
             return False
         if isinstance(reactions, str):
             reactions = [reactions]
+        # Check if it's a binary vector
+        if len(reactions) == self.network.num_reactions and max(reactions)==1:
+            reactions = np.where(reactions==1)[0]
         # Check if the reactions have an indicator variable
         reactions = set(self.network.find_reaction(rxn)[0] for rxn in reactions)
         available = set(rxn.index for rxn in self.variables.assigned_reactions if rxn.cost > 0)

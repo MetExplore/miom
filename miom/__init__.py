@@ -1,11 +1,9 @@
-from miom.miom import (
-    miom,
-    PicosModel, 
-    PythonMipModel, 
-    Solvers
+from miom.miom import ( 
+    load,
+    Solvers,
+    Comparator,
+    ExtractionMode
 )
 
-from miom.mio import (
-    load_gem, 
-    export_gem
-)
+__all__ = ["load", "Solvers", "Comparator", "ExtractionMode"]
+__version__ = "0.9.0-beta.0"

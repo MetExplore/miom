@@ -1,4 +1,5 @@
-from miom import miom, load_gem, Solvers
+from miom import miom, Solvers
+from miom.mio import load_gem
 
 # Load a genome-scale metabolic network. You can load SMBL or Matlab metabolic networks
 # as well using the same method, but it requires to have the cobratoolbox python library
@@ -11,8 +12,9 @@ model = (miom(network)
         .set_rxn_objective(target_rxn)
         .solve(verbosity=1))
 print("Optimal flux:", model.get_fluxes(target_rxn), "mmol/(h·gDW)")
+
 # Show reactions with non-zero flux
-V, _ = model.get_values()
+V = model.get_fluxes()
 print("Number of reactions with flux above +/- 1e-8:", sum(abs(V) > 1e-8))
 
 V, X = (model
@@ -31,6 +33,6 @@ V, X = (model
         .get_values())
 
 print("Number of reactions with an absolute flux value above 1e-8:", sum(abs(V) > 1e-8))
-print("Active reactions:", sum(1 if activity == 1 else 0 for activity in model.variables.indicator_rxn_activity))
-print("Inconsistencies:", sum(1 if activity != activity else 0 for activity in model.variables.indicator_rxn_activity))
+print("Active reactions:", sum(1 if activity == 1 else 0 for activity in model.variables.reaction_activity))
+print("Inconsistencies:", sum(1 if activity != activity else 0 for activity in model.variables.reaction_activity))
 print("Solver status:", model.get_solver_status())
