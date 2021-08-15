@@ -444,6 +444,8 @@
 <span class=sd>            used, or a PicosModel otherwise.</span>
 <span class=sd>    &quot;&quot;&quot;</span>
     <span class=n>solver</span> <span class=o>=</span> <span class=nb>str</span><span class=p>(</span><span class=n>solver</span><span class=o>.</span><span class=n>value</span><span class=p>)</span> <span class=k>if</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>solver</span><span class=p>,</span> <span class=n>Enum</span><span class=p>)</span> <span class=k>else</span> <span class=nb>str</span><span class=p>(</span><span class=n>solver</span><span class=p>)</span>
+    <span class=k>if</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>network</span><span class=p>,</span> <span class=nb>str</span><span class=p>):</span>
+        <span class=n>network</span> <span class=o>=</span> <span class=n>load_gem</span><span class=p>(</span><span class=n>network</span><span class=p>)</span>
     <span class=k>if</span> <span class=n>solver</span> <span class=o>==</span> <span class=s1>&#39;cbc&#39;</span><span class=p>:</span>
         <span class=k>return</span> <span class=n>PythonMipModel</span><span class=p>(</span><span class=n>miom_network</span><span class=o>=</span><span class=n>network</span><span class=p>,</span> <span class=n>solver_name</span><span class=o>=</span><span class=n>solver</span><span class=p>)</span>
     <span class=k>if</span> <span class=n>solver</span> <span class=o>==</span> <span class=s1>&#39;gurobi_pymip&#39;</span><span class=p>:</span>
