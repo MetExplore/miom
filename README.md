@@ -23,7 +23,8 @@ MIOM offers a high-level API that leverages the power of modern Mixed Integer Op
 ```python
 import miom
 
-# Download the Recon3D metabolic network and perform FBA
+# Download the Recon3D metabolic network and find the maximum flux value
+# through the biomass_reaction
 model = (miom
         .load('@BiGG/Recon3D.miom')
         .steady_state()
@@ -33,7 +34,9 @@ model = (miom
 print("Optimal flux:", model.get_fluxes('biomass_reaction'))
 print("Number of active reactions:", sum(abs(model.get_fluxes()) > 1e-8))
 
-# Transform the previous FBA optimization into a Sparse FBA optimization:
+# Transform the previous FBA optimization problem into a Sparse FBA problem (MIP).
+# Solving this problem returns the minimum number of active reactions preserving
+# the optimal flux through the biomass_reaction
 V, X = (model
         .setup(opt_tol=0.05)
         .set_fluxes_for('biomass_reaction')
