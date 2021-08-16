@@ -2,8 +2,8 @@ import argparse
 import miom
 import os
 
-def convert_list_gems(file_or_list, folder=None):
-    for input_file in file_or_list:
+def convert_list_gems(input_files, output=None):
+    for i, input_file in enumerate(input_files):
         input_file = input_file.strip()
         # Check if input_file is a valid file and it exists
         if not (miom.mio._is_url(input_file) or (os.path.isfile(input_file) and os.path.getsize(input_file) > 0)):
@@ -17,8 +17,22 @@ def convert_list_gems(file_or_list, folder=None):
             m = miom.mio.load_gem(input_file)
             print(f"Loaded network with {m.num_reactions} reactions (in-memory size: {m.object_size:.2f} MB)")
             # Concatenate folder and output file
-            if folder is not None:
-                output_file = os.path.join(folder, output_file)
+            if output is not None:
+                if isinstance(output, list) and len(output) == len(input_files):
+                    output_file = output[i]
+                    # Get absolute path of the folder of the file
+                    abspath = os.path.dirname(os.path.abspath(output_file))
+                    if not os.path.isdir(abspath):
+                        # Try to create a folder
+                        try:
+                            print(f"Creating directory {abspath}...")
+                            os.makedirs(abspath)
+                        except OSError as e:
+                            print(f"Cannot create {abspath} folder: {e}")
+                elif os.path.isdir(output):
+                    output_file = os.path.join(output, output_file)
+                else:
+                    raise ValueError("The provided output is not a folder or a list of destinations for each file")
             print(f"Exporting to {output_file}...")
             miom.mio.export_gem(m, output_file)
             # Calculate the MBs of the output_file and print it
@@ -33,12 +47,21 @@ def convert_list_gems(file_or_list, folder=None):
 def convert_gem(args):
     print(f"MIOM v{miom.__version__}")
     input = args.input
+    output = args.output
     if isinstance(input, str):
         if os.path.isfile(input):
             # Open file and get all the lines into a list
             print(f"Reading list of files from {input}...")
             with open(input, "r") as f:
-                input = f.readlines()          
+                in_files, out_files = [], []
+                input = f.readlines()
+                for line in input:
+                    if ";" in line:
+                        in_path, out_path = line.split(";")
+                        in_files.append(in_path.strip())
+                        out_files.append(out_path.strip())
+                input = in_files
+                output = out_files
         elif miom.mio._is_url(input):
             print("Imporing file from URL")
             input = [input]
@@ -50,7 +73,7 @@ def convert_gem(args):
             if not os.path.isdir(input_folder):
                 raise FileNotFoundError(f"{input_folder} is not a valid folder, a file or an URL")
             input = [os.path.join(input, f) for f in os.listdir(input)]
-    convert_list_gems(input, args.output)
+    convert_list_gems(input, output)
 
 
 def get_args():

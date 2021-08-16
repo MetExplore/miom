@@ -171,8 +171,8 @@ def load(network, solver=Solvers.COIN_OR_CBC):
         ```
 
     Args:
-        network (miom_network): A miom metabolic network. A metabolic network
-            can be imported with the [load_gem][miom.mio.load_gem] function.
+        network (miom_network or str): A miom metabolic network or a valid file that
+            can be imported with [load_gem()][miom.mio.load_gem].
         solver (Solver, optional): The solver to be used. Defaults to Solver.GLPK.
 
     Returns:
@@ -201,7 +201,7 @@ class _Variables(ABC):
         return self._indicator_vars
 
     @property
-    def fluxes(self):
+    def fluxvars(self):
         return self._flux_vars
 
     @property
@@ -228,7 +228,7 @@ class _Variables(ABC):
         Returns:
             list: list of the same length as the number of reactions in the model.
         """
-        activity = [None] * len(self.fluxes)
+        activity = [None] * len(self.fluxvars)
         values = self.indicator_values
         if values is None:
             raise ValueError("The indicator values are not set. This means that \
@@ -270,9 +270,9 @@ class _PicosVariables(_Variables):
 
     @property
     def flux_values(self):
-        if self.fluxes is None:
+        if self.fluxvars is None:
             return None
-        arr = np.array(self.fluxes.value)
+        arr = np.array(self.fluxvars.value).squeeze()
         if len(arr) == 1:
             return arr[0]
         return arr
@@ -281,7 +281,7 @@ class _PicosVariables(_Variables):
     def indicator_values(self):
         if self.indicators is None:
             return None
-        arr = np.array(self.indicators.value)
+        arr = np.array(self.indicators.value).squeeze()
         if len(arr) == 1:
             return arr[0]
         return arr
@@ -293,8 +293,8 @@ class _PythonMipVariables(_Variables):
 
     @property
     def flux_values(self):
-        if self.fluxes is not None:
-            return np.array([v.x for v in self.fluxes])
+        if self.fluxvars is not None:
+            return np.array([v.x for v in self.fluxvars])
         return None
 
     @property
@@ -353,7 +353,7 @@ def _weighted_rxns(R, weights=None):
 
 
 class BaseModel(ABC):
-    """Base class for building LP/MIP metabolic models
+    """Base class for building LP/MIP optimization models
     using a high-level API for metabolic problems.
     
     It implements the chainable methods to set-up a LP/MIP 
@@ -365,7 +365,7 @@ class BaseModel(ABC):
     model using the CBC or GUROBI solvers.
     
     !!! note
-        Do not try to instantiate this class directly. Use the [miom()][miom.miom.miom] 
+        Do not try to instantiate this class directly. Use the [load()][miom.miom.load] 
         function instead. The method automatically selects the right implementation 
         depending on the solver.
         
@@ -594,7 +594,6 @@ class BaseModel(ABC):
     @_partial
     def add_constraint(self, constraint):
         """Add a specific constraint to the model.
-
         The constraint should use existing variables already included in the model.
 
         Args:
@@ -631,7 +630,7 @@ class BaseModel(ABC):
         i, _ = self.network.find_reaction(rxn)
         cost = np.zeros((1, self.network.R.shape[0]))
         cost[0, i] = 1
-        self.set_objective(cost, self.variables.fluxes, direction=direction)
+        self.set_objective(cost, self.variables.fluxvars, direction=direction)
         return self
 
     def set_fluxes_for(self, reactions, tolerance=1e-6):
@@ -657,8 +656,8 @@ class BaseModel(ABC):
         i, r = self.network.find_reaction(reactions)
         lb = max(r['lb'], self.variables.flux_values[i] - tolerance)
         ub = min(r['ub'], self.variables.flux_values[i] + tolerance)
-        self.add_constraint(self.variables.fluxes[i] >= lb)
-        self.add_constraint(self.variables.fluxes[i] <= ub)
+        self.add_constraint(self.variables.fluxvars[i] >= lb)
+        self.add_constraint(self.variables.fluxvars[i] <= ub)
         return self
 
     @_partial
@@ -678,7 +677,7 @@ class BaseModel(ABC):
             self,
             extraction_mode=ExtractionMode.ABSOLUTE_FLUX_VALUE,
             comparator=Comparator.GREATER_OR_EQUAL,
-            value=1e-6
+            value=1e-8
     ):
         """Same as [select_subnetwork][miom.miom.BaseModel] but returns the network instead.
 
@@ -845,9 +844,9 @@ class PicosModel(BaseModel):
         min_flux = kwargs["min_flux"] if "min_flux" in kwargs else None
         max_flux = kwargs["max_flux"] if "max_flux" in kwargs else None
         if min_flux is not None:
-            self.variables.fluxes._lower[i] = min_flux
+            self.variables.fluxvars._lower[i] = min_flux
         if max_flux is not None:
-            self.variables.fluxes._upper[i] = max_flux
+            self.variables.fluxvars._upper[i] = max_flux
 
     def _subset_selection(self, *args, **kwargs):
         # Convert to a weighted subset selection problem
@@ -855,7 +854,7 @@ class PicosModel(BaseModel):
         weighted_rxns = self.variables.assigned_reactions
         P = self.problem
         # Build the MIP problem
-        V = self.variables.fluxes
+        V = self.variables.fluxvars
         X = pc.BinaryVariable("X", shape=(len(weighted_rxns), 1))
         C = pc.Constant("C", value=np.array([abs(rxn.cost) for rxn in weighted_rxns]))
         for i, rd in enumerate(weighted_rxns):
@@ -977,15 +976,15 @@ class PythonMipModel(BaseModel):
         min_flux = kwargs["min_flux"] if "min_flux" in kwargs else None
         max_flux = kwargs["max_flux"] if "max_flux" in kwargs else None
         if min_flux is not None:
-            self.variables.fluxes[i].lb = min_flux
+            self.variables.fluxvars[i].lb = min_flux
         if max_flux is not None:
-            self.variables.fluxes[i].ub = max_flux
+            self.variables.fluxvars[i].ub = max_flux
 
     def _subset_selection(self, *args, **kwargs):
         eps = kwargs["eps"]
         weighted_rxns = self.variables.assigned_reactions
         P = self.problem
-        V = self.variables.fluxes
+        V = self.variables.fluxvars
         X = [self.problem.add_var(var_type=mip.BINARY) for _ in weighted_rxns]
         C = [abs(rxn.cost) for rxn in weighted_rxns]
         for i, rd in enumerate(weighted_rxns):

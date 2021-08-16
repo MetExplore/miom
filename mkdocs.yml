@@ -8,10 +8,9 @@ copyright: Copyright &copy; 2021 INRAE Toxalim
 theme:
     name: material
     custom_dir: docs/overrides
-    features:
-      - navigation.instant
 plugins:
 - search
+- autorefs
 - minify:
     minify_html: true
     htmlmin_opts:

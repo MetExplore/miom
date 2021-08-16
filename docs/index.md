@@ -1,19 +1,24 @@
-# Introduction
+<a href="https://metexplore.github.io/miom"><img src="assets/img/miom_v1_fit.png" alt="MIOM" title="MIOM: Mixed Integer Optimization for Metabolism"/></a>
+
 [![Try It Online](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1JAOEHLlRCW8GziIpBqkFwJL2ha3OEOWJ?usp=sharing)
-[![PyPI version](https://badge.fury.io/py/miom.svg)](https://badge.fury.io/py/miom)
+[![PyPI](https://img.shields.io/pypi/v/miom?style=flat-square&label=PyPI&logo=pypi&logoColor=white)](https://pypi.org/project/miom/)
 ![Tests](https://github.com/metexplore/miom/actions/workflows/unit-tests.yml/badge.svg)
+
+# Introduction
 
 __MIOM__ (Mixed Integer Optimization for Metabolism) is a python library for creating and solving complex optimization problems using genome-scale metabolic networks, in just a few lines. 
 
-MIOM offers a high-level API that leverages the power of modern Mixed Integer Optimization (MIO) solvers to easily define steady-state metabolic optimization problems, from simple Flux Balance Analysis (FBA) simulations, to more complex problems, such as sparse FBA or context-specific reconstruction problems, and solve them the __required level of optimality__.
+MIOM offers a high-level API that leverages the power of modern Mixed Integer Optimization (MIO) solvers to easily define steady-state metabolic optimization problems, from simple Flux Balance Analysis (FBA) simulations, to more complex problems, such as [sparse FBA](https://metexplore.github.io/miom/examples/sparse_fba/) or context-specific reconstruction algorithms (see for example [iMAT](https://metexplore.github.io/miom/examples/imat/) or [Fastcore](https://metexplore.github.io/miom/examples/fastcore/)), and solve them the __required level of optimality__. It supports many free and commercial solvers thanks to the integration with the [PICOS](https://picos-api.gitlab.io/picos/) and the [Python-MIP](https://www.python-mip.com/). It is also compatible and complementary to [cobrapy](https://opencobra.github.io/cobrapy/).
 
-MIOM uses the [PICOS](https://picos-api.gitlab.io/picos/) and the [Python-MIP](https://www.python-mip.com/) libraries to build and solve the optimization problems using many commercial, academic and free solvers. It is also compatible and complementary to [cobrapy](https://opencobra.github.io/cobrapy/).
 
-Here is an example of how to implement FBA and Sparse FBA to maximize flux through the biomass reaction in the Recon3D model with MIOM:
+!!! warning
+    This library is functional but still in a very early stage. API is still not stable and might be changed in future versions.
 
 ```python
 import miom
 
+# Download the Recon3D metabolic network and find the maximum flux value
+# through the biomass_reaction
 model = (miom
         .load('@BiGG/Recon3D.miom')
         .steady_state()
@@ -23,7 +28,9 @@ model = (miom
 print("Optimal flux:", model.get_fluxes('biomass_reaction'))
 print("Number of active reactions:", sum(abs(model.get_fluxes()) > 1e-8))
 
-# Minimize the number of reactions preserving the optimal flux
+# Transform the previous FBA optimization problem into a Sparse FBA problem (MIP).
+# Solving this problem returns the minimum number of active reactions preserving
+# the optimal flux through the biomass_reaction
 V, X = (model
         .setup(opt_tol=0.05)
         .set_fluxes_for('biomass_reaction')
@@ -34,8 +41,6 @@ V, X = (model
 print("Number of active reactions:", sum(abs(V) > 1e-8))
 ```
 
-!!! warning
-    This library is functional but still in a very early stage. API is still not stable and might be changed in future versions.
 
 ## Installation
 
@@ -75,8 +80,8 @@ MIOM includes its own lightweight and portable format (.miom) for loading and st
 To make things even easier, the method `load_gem` can import any model from this repository using the relative path, for example:
 
 ```python
-human1 = miom.mio.load_gem("@SysBioChalmers/Human-GEM.miom")
-recon3d = miom.mio.load_gem("@BiGG/Human-GEM.miom")
+human1 = miom.mio.load_gem("@SysBioChalmers/Human-GEM/v1.9.0")
+recon3d = miom.mio.load_gem("@BiGG/Recon3D.miom")
 ```
 
 Here is an example of how to load a metabolic network and maximize the flux through a target reaction using FBA, and then how to modify the original problem to implement the sparse FBA problem adding only a few lines to the original problem:
@@ -169,7 +174,7 @@ model = (miom
 
 ## Documentation
 
-The documentation of the library can be found at https://metexplore.github.io/miom/
+The documentation of the library can be found at [https://metexplore.github.io/miom/](https://metexplore.github.io/miom/)
 
 ## How to cite
 
