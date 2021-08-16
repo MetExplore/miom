@@ -7,6 +7,8 @@ repo_url: https://www.github.com/metexplore/miom
 copyright: Copyright &copy; 2021 INRAE Toxalim
 theme:
     name: material
+    palette:
+      primary: '#2e5c87'
     custom_dir: docs/overrides
 plugins:
 - search
