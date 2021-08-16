@@ -133,10 +133,16 @@ def load_gem(model_or_path):
             matrix, the list of reactions with the lower and upper bounds, the associated
             genes and GPR rules, and the list of metabolites.
     """
+    extensions = ['.xml', '.yml', '.json', '.mat', '.miom']
     if isinstance(model_or_path, str):
         file = model_or_path
         if model_or_path.startswith("@"):
-            file = _download(DEFAULT_REPOSITORY + model_or_path[1:])
+            # Check if the file has a valid file extension
+            if not any(file.endswith(ext) for ext in extensions):
+                # Assume is a relative url pointing to a version
+                file = _download(DEFAULT_REPOSITORY + model_or_path[1:] + "/default.miom")
+            else:
+                file = _download(DEFAULT_REPOSITORY + model_or_path[1:])
         elif _is_url(model_or_path):
             file = _download(model_or_path)
         ext = pathlib.Path(file).suffix

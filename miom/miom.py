@@ -171,8 +171,8 @@ def load(network, solver=Solvers.COIN_OR_CBC):
         ```
 
     Args:
-        network (miom_network): A miom metabolic network. A metabolic network
-            can be imported with the [load_gem][miom.mio.load_gem] function.
+        network (miom_network or str): A miom metabolic network or a valid file that
+            can be imported with [load_gem()][miom.mio.load_gem].
         solver (Solver, optional): The solver to be used. Defaults to Solver.GLPK.
 
     Returns:
@@ -353,7 +353,7 @@ def _weighted_rxns(R, weights=None):
 
 
 class BaseModel(ABC):
-    """Base class for building LP/MIP metabolic models
+    """Base class for building LP/MIP optimization models
     using a high-level API for metabolic problems.
     
     It implements the chainable methods to set-up a LP/MIP 
@@ -365,7 +365,7 @@ class BaseModel(ABC):
     model using the CBC or GUROBI solvers.
     
     !!! note
-        Do not try to instantiate this class directly. Use the [miom()][miom.miom.miom] 
+        Do not try to instantiate this class directly. Use the [load()][miom.miom.load] 
         function instead. The method automatically selects the right implementation 
         depending on the solver.
         
@@ -594,7 +594,6 @@ class BaseModel(ABC):
     @_partial
     def add_constraint(self, constraint):
         """Add a specific constraint to the model.
-
         The constraint should use existing variables already included in the model.
 
         Args:
@@ -678,7 +677,7 @@ class BaseModel(ABC):
             self,
             extraction_mode=ExtractionMode.ABSOLUTE_FLUX_VALUE,
             comparator=Comparator.GREATER_OR_EQUAL,
-            value=1e-6
+            value=1e-8
     ):
         """Same as [select_subnetwork][miom.miom.BaseModel] but returns the network instead.
 
