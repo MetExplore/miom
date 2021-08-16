@@ -1,7 +1,17 @@
-# Introduction
+<div align="center">
+    <a href="https://metexplore.github.io/miom"><img align="center" src="https://github.com/MetExplore/miom/raw/development/docs/assets/img/miom_v1.png" alt="MIOM" width="545" title="MIOM: Mixed Integer Optimization for Metabolism"/>
+    </a>
+</div>
+
+<div align="center">
+
 [![Try It Online](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1JAOEHLlRCW8GziIpBqkFwJL2ha3OEOWJ?usp=sharing)
-[![PyPI version](https://badge.fury.io/py/miom.svg)](https://badge.fury.io/py/miom)
+[![PyPI](https://img.shields.io/pypi/v/probnum?style=flat-square&label=PyPI&logo=pypi&logoColor=white)](https://pypi.org/project/miom/)
 ![Tests](https://github.com/metexplore/miom/actions/workflows/unit-tests.yml/badge.svg)
+
+</div>
+
+---
 
 https://metexplore.github.io/miom
 
