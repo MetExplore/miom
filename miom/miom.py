@@ -502,7 +502,7 @@ class BaseModel(ABC):
         return dict(idxs=idxs, valid_rxn_idx=valid_rxn_idx)
 
     @_partial
-    def subset_selection(self, rxn_weights, eps=1e-2):
+    def subset_selection(self, rxn_weights, direction='max', eps=1e-2):
         """Transform the current model into a subset selection problem.
 
         The subset selection problem consists of selecting the positive weighted
@@ -556,7 +556,7 @@ class BaseModel(ABC):
         rxnw = _weighted_rxns(self.network.R, rxn_weights)
         if self.variables.indicators is None:
             self.variables._assigned_reactions = rxnw
-            return dict(eps=eps)
+            return dict(eps=eps, direction=direction)
         else:
             warnings.warn("Indicator variables were already assigned")
             return False
@@ -867,7 +867,7 @@ class PicosModel(BaseModel):
                 P.add_constraint((1 - X[i]) * rd.lb - V[rd.index] <= 0)
             else:
                 raise ValueError("Unknown type of reaction")
-        P.set_objective('max', C.T * X)
+        P.set_objective(kwargs['direction'], C.T * X)
         self.variables._indicator_vars = X
         return True
 
@@ -982,6 +982,7 @@ class PythonMipModel(BaseModel):
 
     def _subset_selection(self, *args, **kwargs):
         eps = kwargs["eps"]
+        direction = kwargs["direction"]
         weighted_rxns = self.variables.assigned_reactions
         P = self.problem
         V = self.variables.fluxvars
@@ -998,7 +999,12 @@ class PythonMipModel(BaseModel):
             else:
                 raise ValueError("Unknown type of reaction")
         P.objective = mip.xsum((c * X[i] for i, c in enumerate(C)))
-        P.sense = mip.MAXIMIZE
+        if direction == "max" or direction == "maximize":
+            P.sense = mip.MAXIMIZE
+        elif direction == "min" or direction == "minimize":
+            P.sense = mip.MINIMIZE
+        else:
+            raise ValueError("Unknown optimization sense")
         self.variables._indicator_vars = X
         return True
 

@@ -1,5 +1,5 @@
 <div align="center">
-    <a href="https://metexplore.github.io/miom"><img align="center" src="https://github.com/MetExplore/miom/raw/development/docs/assets/img/miom_v1.png" alt="MIOM" width="545" title="MIOM: Mixed Integer Optimization for Metabolism"/>
+    <a href="https://metexplore.github.io/miom"><img align="center" src="https://github.com/MetExplore/miom/raw/development/docs/assets/img/miom_v1.png" alt="MIOM" title="MIOM: Mixed Integer Optimization for Metabolism"/>
     </a>
 </div>
 
@@ -11,9 +11,11 @@
 
 </div>
 
----
+<h4 align="center">
+<a href="https://metexplore.github.io/miom">https://metexplore.github.io/miom</a>
+</h4>
 
-https://metexplore.github.io/miom
+---
 
 __MIOM__ (Mixed Integer Optimization for Metabolism) is a python library for creating and solving complex optimization problems using genome-scale metabolic networks, in just a few lines. 
 
