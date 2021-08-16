@@ -16,6 +16,7 @@ Here is an example of how to implement FBA and Sparse FBA to maximize flux throu
 ```python
 import miom
 
+# Download the Recon3D metabolic network and perform FBA
 model = (miom
         .load('@BiGG/Recon3D.miom')
         .steady_state()
@@ -25,7 +26,7 @@ model = (miom
 print("Optimal flux:", model.get_fluxes('biomass_reaction'))
 print("Number of active reactions:", sum(abs(model.get_fluxes()) > 1e-8))
 
-# Minimize the number of reactions preserving the optimal flux
+# Transform the previous FBA optimization into a Sparse FBA optimization:
 V, X = (model
         .setup(opt_tol=0.05)
         .set_fluxes_for('biomass_reaction')
@@ -77,7 +78,7 @@ To make things even easier, the method `load_gem` can import any model from this
 
 ```python
 human1 = miom.mio.load_gem("@SysBioChalmers/Human-GEM.miom")
-recon3d = miom.mio.load_gem("@BiGG/Human-GEM.miom")
+recon3d = miom.mio.load_gem("@BiGG/Recon3D.miom")
 ```
 
 Here is an example of how to load a metabolic network and maximize the flux through a target reaction using FBA, and then how to modify the original problem to implement the sparse FBA problem adding only a few lines to the original problem:
