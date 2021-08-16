@@ -6,7 +6,7 @@
 <div align="center">
 
 [![Try It Online](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1JAOEHLlRCW8GziIpBqkFwJL2ha3OEOWJ?usp=sharing)
-[![PyPI](https://img.shields.io/pypi/v/probnum?style=flat-square&label=PyPI&logo=pypi&logoColor=white)](https://pypi.org/project/miom/)
+[![PyPI](https://img.shields.io/pypi/v/miom?style=flat-square&label=PyPI&logo=pypi&logoColor=white)](https://pypi.org/project/miom/)
 ![Tests](https://github.com/metexplore/miom/actions/workflows/unit-tests.yml/badge.svg)
 
 </div>
@@ -17,11 +17,8 @@ https://metexplore.github.io/miom
 
 __MIOM__ (Mixed Integer Optimization for Metabolism) is a python library for creating and solving complex optimization problems using genome-scale metabolic networks, in just a few lines. 
 
-MIOM offers a high-level API that leverages the power of modern Mixed Integer Optimization (MIO) solvers to easily define steady-state metabolic optimization problems, from simple Flux Balance Analysis (FBA) simulations, to more complex problems, such as sparse FBA or context-specific reconstruction problems, and solve them the __required level of optimality__.
+MIOM offers a high-level API that leverages the power of modern Mixed Integer Optimization (MIO) solvers to easily define steady-state metabolic optimization problems, from simple Flux Balance Analysis (FBA) simulations, to more complex problems, such as sparse FBA or context-specific reconstruction algorithms, and solve them the __required level of optimality__. It supports many free and commercial solvers thanks to the integration with the [PICOS](https://picos-api.gitlab.io/picos/) and the [Python-MIP](https://www.python-mip.com/). It is also compatible and complementary to [cobrapy](https://opencobra.github.io/cobrapy/).
 
-MIOM uses the [PICOS](https://picos-api.gitlab.io/picos/) and the [Python-MIP](https://www.python-mip.com/) libraries to build and solve the optimization problems using many commercial, academic and free solvers. It is also compatible and complementary to [cobrapy](https://opencobra.github.io/cobrapy/).
-
-Here is an example of how to implement FBA and Sparse FBA to maximize flux through the biomass reaction in the Recon3D model with MIOM:
 
 ```python
 import miom
