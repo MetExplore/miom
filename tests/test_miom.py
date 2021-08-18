@@ -173,8 +173,5 @@ def test_keep_rxn(model):
     )
     assert abs(V[i]) > 1e-8
 
-def test_copy(model):
-    c = model.copy()
-    assert model != c and isinstance(c, BaseModel)
 
     
