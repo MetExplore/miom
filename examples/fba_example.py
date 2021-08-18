@@ -1,7 +1,7 @@
 import miom
 
 # Load a model
-m = miom.mio.load_gem('https://github.com/pablormier/miom-gems/raw/main/gems/mus_musculus_iMM1865.miom')
+m = miom.load_gem('@mus_musculus_iMM1865.miom')
 
 target = 'BIOMASS_reaction'
 opt_flux = (miom.load(network=m, solver=miom.Solvers.GLPK)

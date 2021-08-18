@@ -304,10 +304,10 @@ class _PythonMipVariables(_Variables):
         return None
 
 
-def _partial(fn):
+def _composable(fn):
     """Annotation for methods that return the instance itself to enable chaining.
 
-    If a method `my_method` is annotated with @_partial, a method called `_my_method`
+    If a method `my_method` is annotated with @_composable, a method called `_my_method`
     is expected to be provided by a subclass. Parent method `my_method` is called first
     and the result is passed to the child method `_my_method`.
 
@@ -326,7 +326,7 @@ def _partial(fn):
         # Find subclass implementation
         fname = '_' + fn.__name__
         if not hasattr(self, fname):
-            raise ValueError(f'Method "{fn.__name__}()" is marked as @_partial '
+            raise ValueError(f'Method "{fn.__name__}()" is marked as @_composable '
                              f'but the expected implementation "{fname}()" was not provided '
                              f'by {self.__class__.__name__}')
         func = getattr(self, fname)
@@ -403,7 +403,7 @@ class BaseModel(ABC):
     def get_solver_status(self):
         pass
 
-    @_partial
+    @_composable
     def setup(self, **kwargs):
         """Provide the options for the solver.
 
@@ -444,7 +444,7 @@ class BaseModel(ABC):
         self._options["_min_eps"] = np.sqrt(2*self._options["int_tol"])
         return self._options
 
-    @_partial
+    @_composable
     def steady_state(self):
         """Add the required constraints for finding steady-state fluxes
 
@@ -456,7 +456,7 @@ class BaseModel(ABC):
         """
         pass
 
-    @_partial
+    @_composable
     def keep(self, reactions):
         """Force the inclusion of a list of reactions in the solution.
 
@@ -501,7 +501,7 @@ class BaseModel(ABC):
                 if r.index in valid_rxn_idx]
         return dict(idxs=idxs, valid_rxn_idx=valid_rxn_idx)
 
-    @_partial
+    @_composable
     def subset_selection(self, rxn_weights, direction='max', eps=1e-2):
         """Transform the current model into a subset selection problem.
 
@@ -561,7 +561,7 @@ class BaseModel(ABC):
             warnings.warn("Indicator variables were already assigned")
             return False
 
-    @_partial
+    @_composable
     def set_flux_bounds(self, rxn_id, min_flux=None, max_flux=None):
         """Change the flux bounds of a reaction.
 
@@ -576,7 +576,7 @@ class BaseModel(ABC):
         i, _ = self.network.find_reaction(rxn_id)
         return i
 
-    @_partial
+    @_composable
     def add_constraints(self, constraints):
         """Add a list of constraint to the model
 
@@ -591,7 +591,7 @@ class BaseModel(ABC):
             self.add_constraint(c)
         return len(constraints) > 0
 
-    @_partial
+    @_composable
     def add_constraint(self, constraint):
         """Add a specific constraint to the model.
         The constraint should use existing variables already included in the model.
@@ -601,7 +601,7 @@ class BaseModel(ABC):
         """
         pass
 
-    @_partial
+    @_composable
     def set_objective(self, cost_vector, variables, direction='max'):
         """Set the optmization objective of the model.
 
@@ -660,7 +660,7 @@ class BaseModel(ABC):
         self.add_constraint(self.variables.fluxvars[i] <= ub)
         return self
 
-    @_partial
+    @_composable
     def reset(self):
         """Resets the original problem (removes all modifications)
 
@@ -730,7 +730,7 @@ class BaseModel(ABC):
         S_sub = S_sub[act_met, :]
         return MiomNetwork(S_sub, R_sub, M_sub)
 
-    @_partial
+    @_composable
     def select_subnetwork(
             self,
             mode=ExtractionMode.ABSOLUTE_FLUX_VALUE,
@@ -792,7 +792,7 @@ class BaseModel(ABC):
         else:
             raise ValueError("reactions should be an iterable of strings or a single string")
 
-    @_partial
+    @_composable
     def solve(self, verbosity=None, max_seconds=None):
         """Solve the current model and assign the values to the variables of the model.
 
@@ -803,7 +803,7 @@ class BaseModel(ABC):
         """
         self._last_start_time = perf_counter()
 
-    @_partial
+    @_composable
     def copy(self):
         pass
 
@@ -912,7 +912,13 @@ class PicosModel(BaseModel):
         return PicosModel(previous_step_model=self, miom_network=m)
 
     def _copy(self, **kwargs):
-        return PicosModel(previous_step_model=self)
+        m = PicosModel(previous_step_model=self)
+        # Create a copy of the internal problem
+        m.problem = self.problem.copy()
+        # TODO: Assign the new variables
+        m.variables._indicator_vars = None
+        m.variables._flux_vars = None
+        raise NotImplementedError("Will be added in future versions")
 
     def get_solver_status(self):
         return {
@@ -1051,7 +1057,10 @@ class PythonMipModel(BaseModel):
         return PythonMipModel(previous_step_model=self, miom_network=kwargs["_parent_result"])
 
     def _copy(self, **kwargs):
-        return PythonMipModel(previous_step_model=self)
+        m = PythonMipModel(previous_step_model=self)
+        m.problem = self.problem.copy()
+        raise NotImplementedError("Will be added in future versions")
+        
 
     def get_solver_status(self):
         #solver_status['elapsed_seconds'] = self.problem.search_progress_log.log[-1:][0][0]

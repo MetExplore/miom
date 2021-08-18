@@ -149,9 +149,9 @@ def load_gem(model_or_path):
         if ext == '.miom' or ext == '.xz' or ext == '.npz':
             return _load_compressed_model(file)
         else:
-            return _cobra_to_miom(_read_cobra_model(file))
+            return cobra_to_miom(_read_cobra_model(file))
     else:
-        return _cobra_to_miom(model_or_path)
+        return cobra_to_miom(model_or_path)
 
 
 def _read_cobra_model(filepath):
@@ -191,7 +191,7 @@ def export_gem(miom_network, path_to_exported_file):
             f_out.write(compressed)
 
 
-def _cobra_to_miom(model):
+def cobra_to_miom(model):
     try:
         from cobra.util.array import create_stoichiometric_matrix
     except ImportError as e:
@@ -219,11 +219,12 @@ def _cobra_to_miom(model):
             subsystems.append(rxn.subsystem.tolist())
         else:
             subsystems.append(rxn.subsystem)
-    rxn_data = [(rxn.id, rxn.lower_bound, rxn.upper_bound, subsystem, rxn.gene_reaction_rule)
+    rxn_data = [(rxn.id, rxn.name, rxn.lower_bound, rxn.upper_bound, subsystem, rxn.gene_reaction_rule)
                 for rxn, subsystem in zip(model.reactions, subsystems)]
     met_data = [(met.id, met.name, met.formula) for met in model.metabolites]
     R = np.array(rxn_data, dtype=[
         ('id', 'object'),
+        ('name', 'object'),
         ('lb', 'float'),
         ('ub', 'float'),
         ('subsystem', 'object'),

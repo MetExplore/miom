@@ -17,6 +17,7 @@ def convert_list_gems(input_files, output=None):
             m = miom.mio.load_gem(input_file)
             print(f"Loaded network with {m.num_reactions} reactions (in-memory size: {m.object_size:.2f} MB)")
             # Concatenate folder and output file
+            print(os.path.abspath(output))
             if output is not None:
                 if isinstance(output, list) and len(output) == len(input_files):
                     output_file = output[i]
@@ -29,7 +30,7 @@ def convert_list_gems(input_files, output=None):
                             os.makedirs(abspath)
                         except OSError as e:
                             print(f"Cannot create {abspath} folder: {e}")
-                elif os.path.isdir(output):
+                elif os.path.isdir(output) or os.path.isdir(os.path.abspath(output)):
                     output_file = os.path.join(output, output_file)
                 else:
                     raise ValueError("The provided output is not a folder or a list of destinations for each file")
