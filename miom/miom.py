@@ -924,7 +924,7 @@ class PicosModel(BaseModel):
     def _copy(self, **kwargs):
         m = PicosModel(previous_step_model=self)
         m.problem = self.problem.copy()
-        variables = list(m.problem._mutables.keys())
+        variables = m.problem._mutables.keys()
         if "X" in variables:
             m.variables._indicator_vars = m.problem._mutables.get("X")
         if "V" in variables:

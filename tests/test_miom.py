@@ -187,6 +187,7 @@ def test_copy_problem(model):
     m1 = prepare_fba(model, rxn='EX_i').subset_selection(1)
     m2 = m1.copy()
     assert m1.variables._flux_vars[0] is not m2.variables._flux_vars[0]
+    assert m1.variables._indicator_vars[0] is not m2.variables._indicator_vars[0]
     assert len(m1.variables._flux_vars) == len(m2.variables._flux_vars)
     assert len(m1.variables._indicator_vars) == len(m2.variables._indicator_vars)
     
