@@ -174,4 +174,29 @@ def test_keep_rxn(model):
     assert abs(V[i]) > 1e-8
 
 
+def test_symbolic_constraint(model):
+    m = prepare_fba(model, rxn='EX_i')
+    r1 = m.network.get_reaction_id('R_a_f')
+    r2 = m.network.get_reaction_id('EX_j')
+    constraint = m.variables.fluxvars[r1] + m.variables.fluxvars[r2] <= 1.0
+    flux = m.add_constraint(constraint).solve().get_fluxes('EX_i')
+    assert np.isclose(flux, 4.3333)
+
+
+def test_copy_problem(model):
+    m1 = prepare_fba(model, rxn='EX_i').subset_selection(1)
+    m2 = m1.copy()
+    assert m1.variables._flux_vars[0] is not m2.variables._flux_vars[0]
+    assert m1.variables._indicator_vars[0] is not m2.variables._indicator_vars[0]
+    assert len(m1.variables._flux_vars) == len(m2.variables._flux_vars)
+    assert len(m1.variables._indicator_vars) == len(m2.variables._indicator_vars)
     
+
+def test_copy_and_solve_fba(model):
+    m1 = prepare_fba(model, rxn='EX_i')
+    m2 = m1.copy() 
+    m1.solve()
+    m2.set_flux_bounds('EX_i', max_flux=1.0)
+    m2.solve()
+    assert np.isclose(m1.get_fluxes('EX_i'), 13.3333)
+    assert np.isclose(m2.get_fluxes('EX_i'), 1.0)

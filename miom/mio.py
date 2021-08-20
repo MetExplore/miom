@@ -95,6 +95,14 @@ class MiomNetwork:
     def find_reactions_from_pathway(self, pathway_name):
         return np.array([1 if pathway_name.lower() in rxn['subsystem'].lower() else 0 for rxn in self.R])
 
+    def subnet(self, idxs):
+        S_sub = self.S[:, idxs]
+        R_sub = self.R[idxs]
+        act_met = np.sum(np.abs(S_sub), axis=1) > 0
+        M_sub = self.M[act_met]
+        S_sub = S_sub[act_met, :]
+        return MiomNetwork(S_sub, R_sub, M_sub)
+
     @property
     def object_size(self):
         bytes = self.S.__sizeof__() + self.R.__sizeof__() + self.M.__sizeof__()
@@ -205,7 +213,14 @@ def cobra_to_miom(model):
         # For .mat models, the subsystem can be loaded as a string repr of a numpy array
         if isinstance(subsys, str) and (subsys.startswith("array(") or subsys.startswith("[array(")):
             from numpy import array
-            subsys = eval(subsys)
+            try:
+                subsys = eval(subsys.strip())
+            except:
+                # Try to create a list
+                import re
+                subsys = re.findall('\[\'(.*?)\'\]', subsys)
+                if len(subsys) == 0:
+                    subsys = rxn.subsystem
             # A list containing a numpy array?
             for s in subsys:
                 if "tolist" in dir(s):
