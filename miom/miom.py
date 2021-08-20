@@ -731,12 +731,7 @@ class BaseModel(ABC):
             selected_idx = [rxn.index for rxn in rxns]
         else:
             selected_idx = selected
-        S_sub = self.network.S[:, selected_idx]
-        R_sub = self.network.R[selected_idx]
-        act_met = np.sum(np.abs(S_sub), axis=1) > 0
-        M_sub = self.network.M[act_met]
-        S_sub = S_sub[act_met, :]
-        return MiomNetwork(S_sub, R_sub, M_sub)
+        return self.network.subnet(selected_idx)
 
     @_composable
     def select_subnetwork(
