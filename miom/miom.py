@@ -5,6 +5,7 @@ import mip
 from abc import ABC, abstractmethod
 from functools import wraps
 from collections.abc import Iterable
+from collections import defaultdict
 from miom.mio import load_gem, MiomNetwork
 from typing import NamedTuple
 from enum import Enum, auto
@@ -146,6 +147,13 @@ _RxnVar = NamedTuple(
         ("cost", float),
         ("type", _ReactionType)
     ])
+
+def _get_reversible_vars(weighted_rxn):
+    d = defaultdict(list)
+    for i, rxn in enumerate(weighted_rxn):
+        if rxn.type == _ReactionType.RH_POS or rxn.type == _ReactionType.RH_NEG:
+            d[rxn.index].append(i)
+    return [l for l in d.values() if len(l) > 1]
 
 
 def load(network, solver=Solvers.COIN_OR_CBC):
@@ -867,6 +875,8 @@ class PicosModel(BaseModel):
                 P.add_constraint((1 - X[i]) * rd.lb - V[rd.index] <= 0)
             else:
                 raise ValueError("Unknown type of reaction")
+        for i, j in _get_reversible_vars(weighted_rxns):
+            self.add_constraint(X[i] + X[j] <= 1)
         P.set_objective(kwargs['direction'], C.T * X)
         self.variables._indicator_vars = X
         return True
@@ -913,12 +923,13 @@ class PicosModel(BaseModel):
 
     def _copy(self, **kwargs):
         m = PicosModel(previous_step_model=self)
-        # Create a copy of the internal problem
         m.problem = self.problem.copy()
-        # TODO: Assign the new variables
-        m.variables._indicator_vars = None
-        m.variables._flux_vars = None
-        raise NotImplementedError("Will be added in future versions")
+        variables = list(m.problem._mutables.keys())
+        if "X" in variables:
+            m.variables._indicator_vars = m.problem._mutables.get("X")
+        if "V" in variables:
+            m.variables._flux_vars = m.problem._mutables.get("V")
+        return m
 
     def get_solver_status(self):
         return {
@@ -992,7 +1003,8 @@ class PythonMipModel(BaseModel):
         weighted_rxns = self.variables.assigned_reactions
         P = self.problem
         V = self.variables.fluxvars
-        X = [self.problem.add_var(var_type=mip.BINARY) for _ in weighted_rxns]
+        X = [self.problem.add_var(var_type=mip.BINARY, 
+            name=f"X_{i}_rxn_{rxn.index}") for i, rxn in enumerate(weighted_rxns)]
         C = [abs(rxn.cost) for rxn in weighted_rxns]
         for i, rd in enumerate(weighted_rxns):
             if rd.type is _ReactionType.RH_POS:
@@ -1004,6 +1016,9 @@ class PythonMipModel(BaseModel):
                 self.add_constraint((1 - X[i]) * rd.lb - V[rd.index] <= 0)
             else:
                 raise ValueError("Unknown type of reaction")
+        # Strengthen the problem for RH+ and RH-
+        for i, j in _get_reversible_vars(weighted_rxns):
+            self.add_constraint(X[i] + X[j] <= 1)
         P.objective = mip.xsum((c * X[i] for i, c in enumerate(C)))
         if direction == "max" or direction == "maximize":
             P.sense = mip.MAXIMIZE
@@ -1029,7 +1044,7 @@ class PythonMipModel(BaseModel):
         self.problem += constraint
 
     def _steady_state(self, **kwargs):
-        V = [self.problem.add_var(lb=rxn['lb'], ub=rxn['ub']) for rxn in self.network.R]
+        V = [self.problem.add_var(lb=rxn['lb'], ub=rxn['ub'], name=f"V_{i}") for i, rxn in enumerate(self.network.R)]
         # (Python-MIP does not allow matrix operations like CyLP or CXVOPT)
         for i in range(self.network.S.shape[0]):
             self.problem += mip.xsum(self.network.S[i, j] * V[j]
@@ -1059,7 +1074,9 @@ class PythonMipModel(BaseModel):
     def _copy(self, **kwargs):
         m = PythonMipModel(previous_step_model=self)
         m.problem = self.problem.copy()
-        raise NotImplementedError("Will be added in future versions")
+        m.variables._flux_vars = [v for v in m.problem.vars if v.name.startswith("V_")]
+        m.variables._indicator_vars = [v for v in m.problem.vars if v.name.startswith("X_")]
+        return m
         
 
     def get_solver_status(self):
