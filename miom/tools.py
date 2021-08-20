@@ -62,7 +62,7 @@ def swiftcc(S, R, solver='glpk', verbosity=0):
     consistent[np.logical_and(consistent, rev == True)] = np.diag(np.dot(Z, Z.T)) > tol ** 2
     return np.where(consistent == True)[0]
 
-def consistent_subnetwork(network):
+def consistent_subnetwork(network, solver='glpk'):
     """Finds the largest consistent subnetwork of the original network.
 
     Args:
@@ -71,4 +71,4 @@ def consistent_subnetwork(network):
     Returns:
         MiomNetwork: Flux consistent subnetwork.
     """
-    return network.subnet(swiftcc(network.S, network.R))
+    return network.subnet(swiftcc(network.S, network.R, solver=solver))

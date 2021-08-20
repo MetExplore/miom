@@ -1,8 +1,10 @@
 import argparse
 import miom
 import os
+from miom.tools import consistent_subnetwork
 
-def convert_list_gems(input_files, output=None):
+
+def convert_list_gems(input_files, output=None, consistent=False, solver="glpk"):
     for i, input_file in enumerate(input_files):
         input_file = input_file.strip()
         # Check if input_file is a valid file and it exists
@@ -16,6 +18,10 @@ def convert_list_gems(input_files, output=None):
         try:
             m = miom.mio.load_gem(input_file)
             print(f"Loaded network with {m.num_reactions} reactions (in-memory size: {m.object_size:.2f} MB)")
+            if consistent:
+                print(f"Calculating consistent subnetwork...")
+                m = consistent_subnetwork(m, solver=solver)
+                print(f"Consistent subnetwork contains {m.num_reactions}")
             # Concatenate folder and output file
             # print(os.path.abspath(output))
             if output is not None:
@@ -75,7 +81,7 @@ def convert_gem(args):
             if not os.path.isdir(input_folder):
                 raise FileNotFoundError(f"{input_folder} is not a valid folder, a file or an URL")
             input = [os.path.join(input, f) for f in os.listdir(input)]
-    convert_list_gems(input, output)
+    convert_list_gems(input, output, consistent=args.consistent, solver=args.solver)
 
 
 def get_args():
@@ -87,6 +93,16 @@ def get_args():
     )
     subparsers = parser.add_subparsers(help="sub-command help")
     convert = subparsers.add_parser("convert", help="Convert a model to miom format")
+    convert.add_argument(
+        "--consistent",
+        action="store_true",
+        default=False
+    )
+    convert.add_argument(
+        '--solver', 
+        default="glpk", 
+        type=str
+    )
     convert.add_argument(
         "input",
         help="Input model file (if cobra is installed, any format supported by cobra is allowed)"
