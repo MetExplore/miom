@@ -17,7 +17,7 @@ def convert_list_gems(input_files, output=None):
             m = miom.mio.load_gem(input_file)
             print(f"Loaded network with {m.num_reactions} reactions (in-memory size: {m.object_size:.2f} MB)")
             # Concatenate folder and output file
-            print(os.path.abspath(output))
+            # print(os.path.abspath(output))
             if output is not None:
                 if isinstance(output, list) and len(output) == len(input_files):
                     output_file = output[i]
@@ -43,6 +43,7 @@ def convert_list_gems(input_files, output=None):
             print("Done.")
         except Exception as e:
             print(f"Error while converting {input_file}: {e}")
+            raise e
         
 
 def convert_gem(args):
@@ -99,5 +100,6 @@ def get_args():
 
 if __name__ == '__main__':
     args = get_args()
-    if args.func:
+    # Check if 'func' is an attribute of args
+    if hasattr(args, "func") and args.func:
         args.func(args)

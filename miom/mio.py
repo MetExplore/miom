@@ -205,7 +205,14 @@ def cobra_to_miom(model):
         # For .mat models, the subsystem can be loaded as a string repr of a numpy array
         if isinstance(subsys, str) and (subsys.startswith("array(") or subsys.startswith("[array(")):
             from numpy import array
-            subsys = eval(subsys)
+            try:
+                subsys = eval(subsys.strip())
+            except:
+                # Try to create a list
+                import re
+                subsys = re.findall('\[\'(.*?)\'\]', subsys)
+                if len(subsys) == 0:
+                    subsys = rxn.subsystem
             # A list containing a numpy array?
             for s in subsys:
                 if "tolist" in dir(s):
