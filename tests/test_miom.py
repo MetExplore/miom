@@ -174,4 +174,10 @@ def test_keep_rxn(model):
     assert abs(V[i]) > 1e-8
 
 
-    
+def test_symbolic_constraint(model):
+    m = prepare_fba(model, rxn='EX_i')
+    r1 = m.network.get_reaction_id('R_a_f')
+    r2 = m.network.get_reaction_id('EX_j')
+    constraint = m.variables.fluxvars[r1] + m.variables.fluxvars[r2] <= 1.0
+    flux = m.add_constraint(constraint).solve().get_fluxes('EX_i')
+    assert np.isclose(flux, 4.3333)
