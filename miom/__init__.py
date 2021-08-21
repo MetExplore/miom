@@ -8,4 +8,4 @@ from miom.miom import (
 from miom.mio import load_gem
 
 __all__ = ["load", "load_gem", "Solvers", "Comparator", "ExtractionMode"]
-__version__ = "0.9.0-beta.4"
+__version__ = "0.9.0-beta.5"
