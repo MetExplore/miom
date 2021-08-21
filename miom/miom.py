@@ -556,8 +556,7 @@ class BaseModel(ABC):
         # Calculate min valid EPS based on integrality tolerance
         min_eps = self._options["_min_eps"]
         if eps < min_eps:
-            warnings.warn(f"The minimum epsilon value for the current solver \
-                parameters is {min_eps}, which is less than {eps}.")
+            warnings.warn(f"Minimum epsilon value below min. allowed value, changed to {min_eps}.")
         eps = max(eps, min_eps)
         if not isinstance(rxn_weights, Iterable):
             rxn_weights = [rxn_weights] * self.network.num_reactions
@@ -920,6 +919,7 @@ class PicosModel(BaseModel):
         m = PicosModel(previous_step_model=self)
         m.problem = self.problem.copy()
         variables = m.problem._mutables.keys()
+        m.variables._assigned_reactions = self.variables._assigned_reactions
         if "X" in variables:
             m.variables._indicator_vars = m.problem._mutables.get("X")
         if "V" in variables:
@@ -1069,8 +1069,13 @@ class PythonMipModel(BaseModel):
     def _copy(self, **kwargs):
         m = PythonMipModel(previous_step_model=self)
         m.problem = self.problem.copy()
-        m.variables._flux_vars = [v for v in m.problem.vars if v.name.startswith("V_")]
-        m.variables._indicator_vars = [v for v in m.problem.vars if v.name.startswith("X_")]
+        m.variables._assigned_reactions = self.variables._assigned_reactions
+        fluxvars = [v for v in m.problem.vars if v.name.startswith("V_")]
+        indicators = [v for v in m.problem.vars if v.name.startswith("X_")]
+        if len(fluxvars) > 0:
+            m.variables._flux_vars = fluxvars
+        if len(indicators) > 0:
+            m.variables._indicator_vars = indicators
         return m
         
 
