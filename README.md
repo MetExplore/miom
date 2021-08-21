@@ -6,7 +6,7 @@
 <div align="center">
 
 [![Try It Online](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1JAOEHLlRCW8GziIpBqkFwJL2ha3OEOWJ?usp=sharing)
-[![PyPI](https://img.shields.io/pypi/v/miom?label=PyPI)](https://pypi.org/project/miom/)
+[![PyPI](https://img.shields.io/pypi/v/miom?label=PyPI&logo=pypi&logoColor=lightgrey)](https://pypi.org/project/miom/)
 ![Tests](https://github.com/metexplore/miom/actions/workflows/unit-tests.yml/badge.svg)
 [![Downloads](https://pepy.tech/badge/miom)](https://pepy.tech/project/miom)
 
