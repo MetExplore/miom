@@ -148,12 +148,23 @@ _RxnVar = NamedTuple(
         ("type", _ReactionType)
     ])
 
-def _get_reversible_vars(weighted_rxn):
+def _get_reversible_vars(weighted_rxns):
     d = defaultdict(list)
-    for i, rxn in enumerate(weighted_rxn):
+    for i, rxn in enumerate(weighted_rxns):
         if rxn.type == _ReactionType.RH_POS or rxn.type == _ReactionType.RH_NEG:
             d[rxn.index].append(i)
     return [l for l in d.values() if len(l) > 1]
+
+
+def _get_rxn_var_data(weighted_rxns, rxn_type):
+    idx = [
+        (i, rd.index, rd.lb, rd.ub) 
+        for i, rd in enumerate(weighted_rxns) 
+        if rd.type is rxn_type
+    ]
+    if len(idx) > 0:
+        return [np.array(x) for x in list(zip(*idx))]
+    return None
 
 
 def load(network, solver=Solvers.COIN_OR_CBC):
@@ -857,20 +868,38 @@ class PicosModel(BaseModel):
         P = self.problem
         # Build the MIP problem
         V = self.variables.fluxvars
-        X = pc.BinaryVariable("X", shape=(len(weighted_rxns), 1))
+        X = pc.BinaryVariable("X", shape=(len(weighted_rxns),))
         C = pc.Constant("C", value=np.array([abs(rxn.cost) for rxn in weighted_rxns]))
-        for i, rd in enumerate(weighted_rxns):
-            if rd.type is _ReactionType.RH_POS:
-                P.add_constraint(V[rd.index] >= X[i] * (eps - rd.lb) + rd.lb)
-            elif rd.type is _ReactionType.RH_NEG:
-                P.add_constraint(V[rd.index] <= rd.ub - X[i] * (rd.ub + eps))
-            elif rd.type is _ReactionType.RL:
-                P.add_constraint((1 - X[i]) * rd.ub - V[rd.index] >= 0)
-                P.add_constraint((1 - X[i]) * rd.lb - V[rd.index] <= 0)
-            else:
-                raise ValueError("Unknown type of reaction")
-        for i, j in _get_reversible_vars(weighted_rxns):
-            self.add_constraint(X[i] + X[j] <= 1)
+        # NOTE: For some reason, PICOS have issues parsing the priority operators, so constraints
+        # are split into many parts, otherwise it does not work. The matrix notation is more
+        # efficient and takes less time and memory than using the add_list_of_constraints method in a loop.
+        var_data = _get_rxn_var_data(weighted_rxns, _ReactionType.RH_POS)
+        if var_data is not None:
+            I, J, LB, UB = var_data
+            EA = eps - LB
+            EB = X[I]^EA
+            expr = V[J] >= EB + LB
+            P.add_constraint(expr)
+        var_data = _get_rxn_var_data(weighted_rxns, _ReactionType.RH_NEG)
+        if var_data is not None:
+            I, J, LB, UB = var_data
+            EA = eps + UB
+            EB = X[I]^EA
+            expr = V[J] <= UB - EB
+            P.add_constraint(expr)
+        var_data = _get_rxn_var_data(weighted_rxns, _ReactionType.RL)
+        if var_data is not None:
+            I, J, LB, UB = var_data
+            EA = 1 - X[I]
+            EB = EA^UB
+            EC = EA^LB
+            P.add_constraint(EB - V[J] >= 0)
+            P.add_constraint(EC - V[J] <= 0)
+        # Strengthen the formulation
+        idx = [np.array(x) for x in list(zip(*_get_reversible_vars(weighted_rxns)))]
+        if len(idx) > 0:
+            I, J = idx
+            P.add_constraint(X[I] + X[J] <= 1)
         P.set_objective(kwargs['direction'], C.T * X)
         self.variables._indicator_vars = X
         return True
