@@ -651,8 +651,10 @@ class BaseModel(ABC):
             BaseModel: instance of BaseModel with the modifications applied.
         """
         i, _ = self.network.find_reaction(rxn)
-        cost = np.zeros((1, self.network.R.shape[0]))
-        cost[0, i] = 1
+        #cost = np.zeros((1, self.network.R.shape[0]))
+        cost = np.zeros(self.network.num_reactions)
+        cost[i] = 1
+        #cost[0, i] = 1
         self.set_objective(cost, self.variables.fluxvars, direction=direction)
         return self
 
@@ -945,7 +947,7 @@ class PicosModel(BaseModel):
         else:
             direction = "max"
         C = pc.Constant("C", value=cost_vector)
-        self.problem.set_objective(direction, C * variables)
+        self.problem.set_objective(direction, C.T * variables)
         return True
 
     def _select_subnetwork(self, **kwargs):
@@ -1100,7 +1102,7 @@ class PythonMipModel(BaseModel):
             self.problem.sense = mip.MINIMIZE
         self.problem.objective = (
             mip.xsum(
-                (float(cost_vector[:, i]) * variables[i] for i in range(len(variables)))
+                (float(cost_vector[i]) * variables[i] for i in range(len(variables)))
             ) 
         )      
         return True
