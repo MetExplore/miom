@@ -14,7 +14,7 @@ import miom
 import numpy as np
 
 # Use the flux-consistent subnetwork (fcm) of the Human1 GEM model 
-m = miom.mio.load_gem('https://github.com/pablormier/miom-gems/raw/main/gems/homo_sapiens_human1_fcm.miom')
+m = miom.load_gem('@SysBioChalmers/Human-GEM/v1.9.0/consistent')
 # Select reactions from the cholesterol metabolism as the core reactions to keep
 core_rxn = m.find_reactions_from_pathway("Cholesterol metabolism")
 print(sum(core_rxn))
@@ -25,8 +25,8 @@ weights[core_rxn == 1] = 1
 
 # Exact-Fastcore
 fmc = (miom
-        .load(m, solver=miom.Solvers.GUROBI_PYMIP)
-        .setup(opt_tol=0.01)
+        .load(m, solver=miom.Solvers.CPLEX)
+        .setup(opt_tol=0.02)
         .steady_state()
         .subset_selection(weights)
         .keep(core_rxn == 1)

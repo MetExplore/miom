@@ -9,7 +9,7 @@ Example implementation of iMAT using MIOM. Note that this implementation support
 import miom
 
 # Use the iHuman-GEM model
-m = miom.mio.load_gem('https://github.com/pablormier/miom-gems/raw/main/gems/homo_sapiens_human1.miom')
+m = miom.load_gem('@SysBioChalmers/Human-GEM/v1.9.0')
 
 # Add all the reactions from the Cholesterol pathway to the highly expressed set
 RH = m.find_reactions_from_pathway("Cholesterol metabolism")

@@ -422,6 +422,11 @@ class BaseModel(ABC):
     def get_solver_status(self):
         pass
 
+    @property
+    def status(self):
+        return self.get_solver_status()
+        
+
     @_composable
     def setup(self, **kwargs):
         """Provide the options for the solver.
@@ -956,8 +961,13 @@ class PicosModel(BaseModel):
         return m
 
     def get_solver_status(self):
+        # Check if attribute solutions exist
+        if not hasattr(self, "solutions"):
+            status = "empty"
+        else:
+            status = self.solutions.claimedStatus
         return {
-            "status": self.solutions.claimedStatus,
+            "status": status,
             "objective_value": self.problem.value,
             "elapsed_seconds": self.last_solver_time
         }

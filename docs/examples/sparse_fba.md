@@ -12,7 +12,7 @@ import miom
 # Load a genome-scale metabolic network. You can load SMBL or Matlab metabolic networks
 # as well using the same method, but it requires to have the cobratoolbox python library
 # installed.
-network = miom.mio.load_gem("https://github.com/pablormier/miom-gems/raw/main/gems/mus_musculus_iMM1865.miom")
+network = miom.load_gem("@iMM1865")
 
 # Create the sparse FBA problem to get a solution that maximizes
 # the optimal flux through the BIOMASS_reaction minimizing the

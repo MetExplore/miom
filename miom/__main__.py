@@ -57,7 +57,7 @@ def convert_gem(args):
     input = args.input
     output = args.output
     if isinstance(input, str):
-        if os.path.isfile(input):
+        if os.path.isfile(input) and input.endswith('.txt'):
             # Open file and get all the lines into a list
             print(f"Reading list of files from {input}...")
             with open(input, "r") as f:
@@ -70,17 +70,12 @@ def convert_gem(args):
                         out_files.append(out_path.strip())
                 input = in_files
                 output = out_files
-        elif miom.mio._is_url(input):
-            print("Imporing file from URL")
-            input = [input]
-        else:
-            # Assume it's a folder
-            input_folder = os.path.abspath(input)
-            print("Input folder", input_folder)
-            # Check if folder is valid and exists:
-            if not os.path.isdir(input_folder):
-                raise FileNotFoundError(f"{input_folder} is not a valid folder, a file or an URL")
+        elif os.path.isdir(os.path.abspath(input)):
+            #in_folder = os.path.abspath(input)
             input = [os.path.join(input, f) for f in os.listdir(input)]
+        else:
+            input = [input]
+            output = [output]
     convert_list_gems(input, output, consistent=args.consistent, solver=args.solver)
 
 
