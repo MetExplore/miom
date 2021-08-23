@@ -214,10 +214,10 @@ This simple method makes it possible to model a wide variety of complex constrai
 import miom
 import numpy as np
 
-# Use the flux-consistent subnetwork (fcm) of the Human1 GEM model
+# Use the flux-consistent subnetwork of the Human1 GEM model
 # NOTE: Fastcore requires that reactions in the core are flux consistent,
 # otherwise the problem would be infeasible. 
-m = miom.load_gem('@homo_sapiens_human1_fcm.miom')
+m = miom.load_gem('@SysBioChalmers/Human-GEM/v1.9.0/consistent')
 # Select reactions from the cholesterol metabolism as the core reactions to keep
 core_rxn = m.find_reactions_from_pathway("Cholesterol metabolism")
 # Assign a negative weight for reactions not in the core
