@@ -162,12 +162,12 @@ model = (miom
         .steady_state())
 ```
 
-After the equations 
+Now the optimization model contains the system of equations for the steady state condition of the fluxes. Now, it can be extended by adding new constraints or changing properties of the model. For example, in order to find the maximum flux of the `biomass_reaction` (limiting the max production to 10) can be done as follows:
 
 ```python
 flux = (model
         .set_rxn_objective('biomass_reaction')
-        .set_flux_bounds('biomass_reaction', max_flux=1.0)
+        .set_flux_bounds('biomass_reaction', max_flux=10.0)
         .solve()
         .get_fluxes('biomass_reaction'))
 ```
@@ -208,7 +208,7 @@ Unfortunately, there are a few problems with these type of approximations. First
 
 MIOM incorporates specific methods to easily model and solve such problems. Just by calling the method `subset_selection()`, which takes as input a weight for all reactions or a list of weights for each reaction, it transforms the current problem into a *best subset selection* problem, in which the objective function is the sum of the weights of the reactions in the solution (where positive weighted reactions contribute to the objective function if they are selected, and negative weighted reactions contribute to the objective function if they are not selected).
 
-This simple method makes it possible to model a wide variety of complex constraint-based optimization problems. See for example how easy it is to implement the exact version of the weighted Fastcore with MIOM:
+This simple method makes it possible to model a wide variety of complex constraint-based optimization problems. See for example how easy it is to implement the exact and generalized version of the Fastcore with MIOM:
 
 ```python
 import miom
@@ -243,7 +243,7 @@ print(fmc.num_reactions)
 
 ## Advantages
 
-* __It's easy to use:__ MIOM uses the [PICOS](https://picos-api.gitlab.io/picos/) and the [Python-MIP](https://www.python-mip.com/) libraries, which means you can use any solver supported by those libraries.
+* __It's flexible:__ MIOM uses the [PICOS](https://picos-api.gitlab.io/picos/) and the [Python-MIP](https://www.python-mip.com/) libraries, which means you can use any solver supported by those libraries.
 * __It's easy to extend:__ MIOM is written in pure python, so you can easily extend it to solve more complex optimization problems.
 * __It makes the problem explicit:__ MIOM uses a declarative way to express the problem, so you can easily read and understand what you are solving and differences between algorithms.
 * __It's fast:__ MIOM leverages the power of MIO solvers to solve complex optimization problems. You can control the quality and speed of the solutions for your problem and get better solutions that the approximations (LP) of the original problem available in other constraint-based modeling libraries.

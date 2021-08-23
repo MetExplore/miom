@@ -5,8 +5,9 @@ from miom.miom import (
     PythonMipModel,
     PicosModel
 )
-import pytest
+from miom.tools import consistent_subnetwork
 from miom.mio import load_gem
+import pytest
 import pathlib
 import numpy as np
 
@@ -200,3 +201,30 @@ def test_copy_and_solve_fba(model):
     m2.solve()
     assert np.isclose(m1.get_fluxes('EX_i'), 13.3333)
     assert np.isclose(m2.get_fluxes('EX_i'), 1.0)
+
+
+def test_swiftcc(gem):
+    m, _ = consistent_subnetwork(gem)
+    assert m.num_reactions == gem.num_reactions
+
+
+def test_miom_consistent_subnetwork(model):
+    V, X = (
+        prepare_fba(model)
+        .subset_selection(1)
+        .solve()
+        .get_values()
+    )
+    assert np.sum(X > 0.5) == model.network.num_reactions
+
+
+def test_miom_consistent_subnetwork_with_blocked_rxns(model):
+    V, X = (
+        prepare_fba(model)
+        .set_flux_bounds('EX_j', max_flux=0.0, min_flux=0.0)
+        .subset_selection(1)
+        .solve()
+        .get_values()
+    )
+    assert np.sum(X > 0.5) == 8
+    

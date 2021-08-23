@@ -683,6 +683,9 @@ class BaseModel(ABC):
         self.add_constraint(self.variables.fluxvars[i] <= ub)
         return self
 
+    def fix_fluxes_for(self, reactions, tolerance=1e-6):
+        return self.set_fluxes_for(reactions, tolerance)
+
     @_composable
     def reset(self):
         """Resets the original problem (removes all modifications)

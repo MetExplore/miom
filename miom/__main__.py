@@ -20,7 +20,7 @@ def convert_list_gems(input_files, output=None, consistent=False, solver="glpk")
             print(f"Loaded network with {m.num_reactions} reactions (in-memory size: {m.object_size:.2f} MB)")
             if consistent:
                 print(f"Calculating consistent subnetwork...")
-                m = consistent_subnetwork(m, solver=solver)
+                m,_ = consistent_subnetwork(m, solver=solver)
                 print(f"Consistent subnetwork contains {m.num_reactions}")
             # Concatenate folder and output file
             # print(os.path.abspath(output))
