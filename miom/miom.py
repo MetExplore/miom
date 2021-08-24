@@ -581,8 +581,7 @@ class BaseModel(ABC):
             self.variables._assigned_reactions = rxnw
             return dict(eps=eps, direction=direction)
         else:
-            warnings.warn("Indicator variables were already assigned")
-            return False
+            raise ValueError("The current model is already a subset selection problem.")
 
     @_composable
     def set_flux_bounds(self, rxn_id, min_flux=None, max_flux=None):
