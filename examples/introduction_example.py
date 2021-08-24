@@ -3,7 +3,7 @@ import miom
 # Load a genome-scale metabolic network. You can load SMBL or Matlab metabolic networks
 # as well using the same method, but it requires to have the cobratoolbox python library
 # installed.
-network = miom.load_gem("@mus_musculus_iMM1865.miom")
+network = miom.load_gem("@iMM1865")
 target_rxn = "BIOMASS_reaction"
 # Create the optimization problem with miom and solve
 model = (miom
