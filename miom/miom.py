@@ -658,7 +658,13 @@ class BaseModel(ABC):
         self.set_objective(cost, self.variables.fluxvars, direction=direction)
         return self
 
+
     def set_fluxes_for(self, reactions, tolerance=1e-6):
+        warnings.warn("This method was renamed to fix_fluxes_for. It will dissappear in the v0.9.0", DeprecationWarning)
+        return self.fix_fluxes_for(reactions, tolerance)
+
+
+    def fix_fluxes_for(self, reactions, tolerance=1e-6):
         """Force the flux of certain reactions to match current values.
 
         After calling `.solve()` for a flux optimization problem (e.g. FBA), this
@@ -678,15 +684,19 @@ class BaseModel(ABC):
         Returns:
             BaseModel: instance of BaseModel with the modifications applied.
         """
-        i, r = self.network.find_reaction(reactions)
-        lb = max(r['lb'], self.variables.flux_values[i] - tolerance)
-        ub = min(r['ub'], self.variables.flux_values[i] + tolerance)
-        self.add_constraint(self.variables.fluxvars[i] >= lb)
-        self.add_constraint(self.variables.fluxvars[i] <= ub)
-        return self
+        if isinstance(reactions, str):
+            reactions = [reactions]
 
-    def fix_fluxes_for(self, reactions, tolerance=1e-6):
-        return self.set_fluxes_for(reactions, tolerance)
+        for rid in reactions:
+            if isinstance(rid, np.ndarray):
+                # TODO: Test this path
+                rid = rid['id']
+            idx, rxn = self.network.find_reaction(rid)
+            lb = max(rxn['lb'], self.variables.flux_values[idx] - tolerance)
+            ub = min(rxn['ub'], self.variables.flux_values[idx] + tolerance)
+            self.add_constraint(self.variables.fluxvars[idx] >= lb)
+            self.add_constraint(self.variables.fluxvars[idx] <= ub)
+        return self
 
     @_composable
     def reset(self):
@@ -749,8 +759,10 @@ class BaseModel(ABC):
         if extraction_mode == ExtractionMode.INDICATOR_VALUE:
             rxns = [self.variables.assigned_reactions[x] for x in selected]
             selected_idx = [rxn.index for rxn in rxns]
-        else:
+        elif extraction_mode == ExtractionMode.ABSOLUTE_FLUX_VALUE:
             selected_idx = selected
+        else:
+            raise NotImplementedError("Only indicator variables and absolute flux values are supported")
         return self.network.subnet(selected_idx)
 
     @_composable

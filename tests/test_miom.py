@@ -82,6 +82,7 @@ def test_network_selection_using_indicators(model):
     )
     assert network.num_reactions == 6
 
+
 def test_network_selection_using_fluxes(model):
     m = prepare_fba(model, 'EX_h', direction='max')
     network = (
