@@ -660,11 +660,11 @@ class BaseModel(ABC):
 
 
     def set_fluxes_for(self, reactions, tolerance=1e-6):
-        warnings.warn("This method was renamed to fix_fluxes_for. It will dissappear in the v0.9.0", DeprecationWarning)
-        return self.fix_fluxes_for(reactions, tolerance)
+        warnings.warn("This method was renamed to fix_fluxes. It will dissappear in the v0.9.0", DeprecationWarning)
+        return self.fix_fluxes(reactions, tolerance)
 
 
-    def fix_fluxes_for(self, reactions, tolerance=1e-6):
+    def fix_fluxes(self, reactions, tolerance=1e-6):
         """Force the flux of certain reactions to match current values.
 
         After calling `.solve()` for a flux optimization problem (e.g. FBA), this
