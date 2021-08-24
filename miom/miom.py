@@ -499,10 +499,10 @@ class BaseModel(ABC):
             BaseModel: instance of BaseModel with the modifications applied.
         """
         if self.variables.indicators is None:
-            raise ValueError("No indicator variables for reactions, "
-                             "transform it to a subset selection problem calling "
-                             "subset_selection first, providing positive weights for the "
-                             "reactions you want to keep.")
+            raise ValueError("""No indicator variables for reactions, 
+                             transform it to a subset selection problem calling
+                             subset_selection first, providing positive weights for the
+                             reactions you want to keep.""")
         if reactions is None or len(reactions) == 0:
             return False
         if isinstance(reactions, str):
@@ -515,10 +515,10 @@ class BaseModel(ABC):
         available = set(rxn.index for rxn in self.variables.assigned_reactions if rxn.cost > 0)
         diff = reactions - available
         if len(diff) != 0:
-            raise ValueError(f"Only reactions associated with positive weights "
-                             f"can be forced to be selected. The following reaction "
-                             f"indexes have no indicator variables or are associated with "
-                             f"negative weights: {diff}.")
+            raise ValueError(f"""Only reactions associated with positive weights
+                             can be forced to be selected. The following reaction 
+                             indexes have no indicator variables or are associated with 
+                             negative weights: {diff}.""")
         valid_rxn_idx = reactions & available
         # Get the indexes of the indicator variables
         idxs = [i for i, r in enumerate(self.variables.assigned_reactions)
@@ -613,6 +613,29 @@ class BaseModel(ABC):
         for c in constraints:
             self.add_constraint(c)
         return len(constraints) > 0
+
+    @_composable
+    def exclude(self, indicator_values=None):
+        """Exclude a solution from the set of feasible solutions.
+
+        If the problem is a subset_selection problem, it adds a new constraint
+        to exclude the given values (or the current values of the indicator variables)
+        from the set of feasible solutions. This is useful to force the solver to find
+        alternative solutions in a manual fashion.
+        
+
+        Args:
+            values (list, optional): List of values for each indicator variable. Defaults to None.
+
+        Returns:
+            BaseModel: instance of BaseModel with the modifications applied.
+        """
+        if self.variables.indicators is None:
+            raise ValueError("""The optimization model does not contain indicator variables.
+            Make sure that the problem is a subset_selection problem.""")
+        if indicator_values is None:
+            indicator_values = np.array(self.variables.indicator_values)
+        return dict(indicator_values=indicator_values)
 
     @_composable
     def add_constraint(self, constraint):
@@ -874,6 +897,13 @@ class PicosModel(BaseModel):
         # The sum should be equal to the number of different reactions
         self.add_constraint(C.T * self.variables.indicators[idx] >= n)
 
+    def _exclude(self, *args, **kwargs):
+        values = kwargs["indicator_values"]
+        b = sum(values) - 1
+        self.add_constraint(
+            (sum(self.variables.indicators[values==1]) + 
+            sum(self.variables.indicators[values==0])) <= b)
+
     def _set_flux_bounds(self, *args, **kwargs):
         i = kwargs["_parent_result"]
         min_flux = kwargs["min_flux"] if "min_flux" in kwargs else None
@@ -1038,6 +1068,13 @@ class PythonMipModel(BaseModel):
             mip.xsum((v for v in variables)) >= n
         )
         return True 
+
+    def _exclude(self, *args, **kwargs):
+        values = kwargs["indicator_values"]
+        b = sum(values) - 1
+        x1 = mip.sum(v for i, v in enumerate(self.variable.indicators) if values[i] == 1)
+        x2 = mip.sum(v for i, v in enumerate(self.variable.indicators) if values[i] == 0)
+        self.add_constraint(x1 + x2 <= b)
         
     def _set_flux_bounds(self, *args, **kwargs):
         i = kwargs["_parent_result"]
