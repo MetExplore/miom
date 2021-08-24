@@ -898,11 +898,12 @@ class PicosModel(BaseModel):
         self.add_constraint(C.T * self.variables.indicators[idx] >= n)
 
     def _exclude(self, *args, **kwargs):
-        values = kwargs["indicator_values"]
+        values = np.round(kwargs["indicator_values"])
         b = sum(values) - 1
-        self.add_constraint(
-            (sum(self.variables.indicators[values==1]) + 
-            sum(self.variables.indicators[values==0])) <= b)
+        idx_one = np.flatnonzero(values==1)
+        idx_zero = np.flatnonzero(values==0)
+        s = sum(self.variables.indicators[idx_one] // self.variables.indicators[idx_zero])
+        self.add_constraint(s <= b)
 
     def _set_flux_bounds(self, *args, **kwargs):
         i = kwargs["_parent_result"]
@@ -1072,8 +1073,8 @@ class PythonMipModel(BaseModel):
     def _exclude(self, *args, **kwargs):
         values = kwargs["indicator_values"]
         b = sum(values) - 1
-        x1 = mip.sum(v for i, v in enumerate(self.variable.indicators) if values[i] == 1)
-        x2 = mip.sum(v for i, v in enumerate(self.variable.indicators) if values[i] == 0)
+        x1 = mip.xsum(v for i, v in enumerate(self.variables.indicators) if values[i] == 1)
+        x2 = mip.xsum(v for i, v in enumerate(self.variables.indicators) if values[i] == 0)
         self.add_constraint(x1 + x2 <= b)
         
     def _set_flux_bounds(self, *args, **kwargs):

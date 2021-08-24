@@ -222,3 +222,10 @@ def test_miom_consistent_subnetwork_with_blocked_rxns(model):
     )
     assert np.sum(X > 0.5) == 8
     
+def test_exclude(model):
+    weights = -1*np.ones(model.network.num_reactions)
+    weights[[0,4,6,7,8,9]] = 1
+    m = prepare_fba(model).subset_selection(weights).solve()
+    assert m.status['objective_value'] == 9.0
+    m.exclude().solve()
+    assert m.status['objective_value'] == 8.0
