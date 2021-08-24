@@ -4,7 +4,8 @@ A simple Flux Balance Analysis can be easily defined and solved with any of the 
 
 ```python
 import miom
-network = miom.mio.load_gem("https://github.com/pablormier/miom-gems/raw/main/gems/mus_musculus_iMM1865.miom")
+# Load  the iMM1865 mouse model from the repository
+network = miom.mio.load_gem("@iMM1865")
 target = "BIOMASS_reaction"
 flux = (miom
         .load(network)

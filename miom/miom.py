@@ -422,6 +422,11 @@ class BaseModel(ABC):
     def get_solver_status(self):
         pass
 
+    @property
+    def status(self):
+        return self.get_solver_status()
+        
+
     @_composable
     def setup(self, **kwargs):
         """Provide the options for the solver.
@@ -494,10 +499,10 @@ class BaseModel(ABC):
             BaseModel: instance of BaseModel with the modifications applied.
         """
         if self.variables.indicators is None:
-            raise ValueError("No indicator variables for reactions, "
-                             "transform it to a subset selection problem calling "
-                             "subset_selection first, providing positive weights for the "
-                             "reactions you want to keep.")
+            raise ValueError("""No indicator variables for reactions, 
+                             transform it to a subset selection problem calling
+                             subset_selection first, providing positive weights for the
+                             reactions you want to keep.""")
         if reactions is None or len(reactions) == 0:
             return False
         if isinstance(reactions, str):
@@ -510,10 +515,10 @@ class BaseModel(ABC):
         available = set(rxn.index for rxn in self.variables.assigned_reactions if rxn.cost > 0)
         diff = reactions - available
         if len(diff) != 0:
-            raise ValueError(f"Only reactions associated with positive weights "
-                             f"can be forced to be selected. The following reaction "
-                             f"indexes have no indicator variables or are associated with "
-                             f"negative weights: {diff}.")
+            raise ValueError(f"""Only reactions associated with positive weights
+                             can be forced to be selected. The following reaction 
+                             indexes have no indicator variables or are associated with 
+                             negative weights: {diff}.""")
         valid_rxn_idx = reactions & available
         # Get the indexes of the indicator variables
         idxs = [i for i, r in enumerate(self.variables.assigned_reactions)
@@ -610,6 +615,29 @@ class BaseModel(ABC):
         return len(constraints) > 0
 
     @_composable
+    def exclude(self, indicator_values=None):
+        """Exclude a solution from the set of feasible solutions.
+
+        If the problem is a subset_selection problem, it adds a new constraint
+        to exclude the given values (or the current values of the indicator variables)
+        from the set of feasible solutions. This is useful to force the solver to find
+        alternative solutions in a manual fashion.
+        
+
+        Args:
+            values (list, optional): List of values for each indicator variable. Defaults to None.
+
+        Returns:
+            BaseModel: instance of BaseModel with the modifications applied.
+        """
+        if self.variables.indicators is None:
+            raise ValueError("""The optimization model does not contain indicator variables.
+            Make sure that the problem is a subset_selection problem.""")
+        if indicator_values is None:
+            indicator_values = np.array(self.variables.indicator_values)
+        return dict(indicator_values=indicator_values)
+
+    @_composable
     def add_constraint(self, constraint):
         """Add a specific constraint to the model.
         The constraint should use existing variables already included in the model.
@@ -646,12 +674,20 @@ class BaseModel(ABC):
             BaseModel: instance of BaseModel with the modifications applied.
         """
         i, _ = self.network.find_reaction(rxn)
-        cost = np.zeros((1, self.network.R.shape[0]))
-        cost[0, i] = 1
+        #cost = np.zeros((1, self.network.R.shape[0]))
+        cost = np.zeros(self.network.num_reactions)
+        cost[i] = 1
+        #cost[0, i] = 1
         self.set_objective(cost, self.variables.fluxvars, direction=direction)
         return self
 
+
     def set_fluxes_for(self, reactions, tolerance=1e-6):
+        warnings.warn("This method was renamed to fix_fluxes. It will dissappear in the v0.9.0", DeprecationWarning)
+        return self.fix_fluxes(reactions, tolerance)
+
+
+    def fix_fluxes(self, reactions, tolerance=1e-6):
         """Force the flux of certain reactions to match current values.
 
         After calling `.solve()` for a flux optimization problem (e.g. FBA), this
@@ -671,11 +707,18 @@ class BaseModel(ABC):
         Returns:
             BaseModel: instance of BaseModel with the modifications applied.
         """
-        i, r = self.network.find_reaction(reactions)
-        lb = max(r['lb'], self.variables.flux_values[i] - tolerance)
-        ub = min(r['ub'], self.variables.flux_values[i] + tolerance)
-        self.add_constraint(self.variables.fluxvars[i] >= lb)
-        self.add_constraint(self.variables.fluxvars[i] <= ub)
+        if isinstance(reactions, str):
+            reactions = [reactions]
+
+        for rid in reactions:
+            if isinstance(rid, np.ndarray):
+                # TODO: Test this path
+                rid = rid['id']
+            idx, rxn = self.network.find_reaction(rid)
+            lb = max(rxn['lb'], self.variables.flux_values[idx] - tolerance)
+            ub = min(rxn['ub'], self.variables.flux_values[idx] + tolerance)
+            self.add_constraint(self.variables.fluxvars[idx] >= lb)
+            self.add_constraint(self.variables.fluxvars[idx] <= ub)
         return self
 
     @_composable
@@ -739,8 +782,10 @@ class BaseModel(ABC):
         if extraction_mode == ExtractionMode.INDICATOR_VALUE:
             rxns = [self.variables.assigned_reactions[x] for x in selected]
             selected_idx = [rxn.index for rxn in rxns]
-        else:
+        elif extraction_mode == ExtractionMode.ABSOLUTE_FLUX_VALUE:
             selected_idx = selected
+        else:
+            raise NotImplementedError("Only indicator variables and absolute flux values are supported")
         return self.network.subnet(selected_idx)
 
     @_composable
@@ -852,6 +897,14 @@ class PicosModel(BaseModel):
         # The sum should be equal to the number of different reactions
         self.add_constraint(C.T * self.variables.indicators[idx] >= n)
 
+    def _exclude(self, *args, **kwargs):
+        values = np.round(kwargs["indicator_values"])
+        b = sum(values) - 1
+        idx_one = np.flatnonzero(values==1)
+        idx_zero = np.flatnonzero(values==0)
+        s = sum(self.variables.indicators[idx_one] // self.variables.indicators[idx_zero])
+        self.add_constraint(s <= b)
+
     def _set_flux_bounds(self, *args, **kwargs):
         i = kwargs["_parent_result"]
         min_flux = kwargs["min_flux"] if "min_flux" in kwargs else None
@@ -937,7 +990,7 @@ class PicosModel(BaseModel):
         else:
             direction = "max"
         C = pc.Constant("C", value=cost_vector)
-        self.problem.set_objective(direction, C * variables)
+        self.problem.set_objective(direction, C.T * variables)
         return True
 
     def _select_subnetwork(self, **kwargs):
@@ -956,8 +1009,13 @@ class PicosModel(BaseModel):
         return m
 
     def get_solver_status(self):
+        # Check if attribute solutions exist
+        if not hasattr(self, "solutions"):
+            status = "empty"
+        else:
+            status = self.solutions.claimedStatus
         return {
-            "status": self.solutions.claimedStatus,
+            "status": status,
             "objective_value": self.problem.value,
             "elapsed_seconds": self.last_solver_time
         }
@@ -1011,6 +1069,13 @@ class PythonMipModel(BaseModel):
             mip.xsum((v for v in variables)) >= n
         )
         return True 
+
+    def _exclude(self, *args, **kwargs):
+        values = kwargs["indicator_values"]
+        b = sum(values) - 1
+        x1 = mip.xsum(v for i, v in enumerate(self.variables.indicators) if values[i] == 1)
+        x2 = mip.xsum(v for i, v in enumerate(self.variables.indicators) if values[i] == 0)
+        self.add_constraint(x1 + x2 <= b)
         
     def _set_flux_bounds(self, *args, **kwargs):
         i = kwargs["_parent_result"]
@@ -1087,7 +1152,7 @@ class PythonMipModel(BaseModel):
             self.problem.sense = mip.MINIMIZE
         self.problem.objective = (
             mip.xsum(
-                (float(cost_vector[:, i]) * variables[i] for i in range(len(variables)))
+                (float(cost_vector[i]) * variables[i] for i in range(len(variables)))
             ) 
         )      
         return True

@@ -5,8 +5,8 @@ from miom.miom import (
     PythonMipModel,
     PicosModel
 )
-import pytest
 from miom.mio import load_gem
+import pytest
 import pathlib
 import numpy as np
 
@@ -81,6 +81,7 @@ def test_network_selection_using_indicators(model):
         .network
     )
     assert network.num_reactions == 6
+
 
 def test_network_selection_using_fluxes(model):
     m = prepare_fba(model, 'EX_h', direction='max')
@@ -200,3 +201,31 @@ def test_copy_and_solve_fba(model):
     m2.solve()
     assert np.isclose(m1.get_fluxes('EX_i'), 13.3333)
     assert np.isclose(m2.get_fluxes('EX_i'), 1.0)
+
+def test_miom_consistent_subnetwork(model):
+    V, X = (
+        prepare_fba(model)
+        .subset_selection(1)
+        .solve()
+        .get_values()
+    )
+    assert np.sum(X > 0.5) == model.network.num_reactions
+
+
+def test_miom_consistent_subnetwork_with_blocked_rxns(model):
+    V, X = (
+        prepare_fba(model)
+        .set_flux_bounds('EX_j', max_flux=0.0, min_flux=0.0)
+        .subset_selection(1)
+        .solve()
+        .get_values()
+    )
+    assert np.sum(X > 0.5) == 8
+    
+def test_exclude(model):
+    weights = -1*np.ones(model.network.num_reactions)
+    weights[[0,4,6,7,8,9]] = 1
+    m = prepare_fba(model).subset_selection(weights).solve()
+    assert m.status['objective_value'] == 9.0
+    m.exclude().solve()
+    assert m.status['objective_value'] == 8.0

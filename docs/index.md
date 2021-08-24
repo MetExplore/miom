@@ -251,7 +251,7 @@ print(fmc.num_reactions)
 
 ## Advantages
 
-* __It's easy to use:__ MIOM uses the [PICOS](https://picos-api.gitlab.io/picos/) and the [Python-MIP](https://www.python-mip.com/) libraries, which means you can use any solver supported by those libraries.
+* __It's flexible:__ MIOM uses the [PICOS](https://picos-api.gitlab.io/picos/) and the [Python-MIP](https://www.python-mip.com/) libraries, which means you can use any solver supported by those libraries.
 * __It's easy to extend:__ MIOM is written in pure python, so you can easily extend it to solve more complex optimization problems.
 * __It makes the problem explicit:__ MIOM uses a declarative way to express the problem, so you can easily read and understand what you are solving and differences between algorithms.
 * __It's fast:__ MIOM leverages the power of MIO solvers to solve complex optimization problems. You can control the quality and speed of the solutions for your problem and get better solutions that the approximations (LP) of the original problem available in other constraint-based modeling libraries.

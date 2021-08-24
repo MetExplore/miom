@@ -13,8 +13,8 @@ The Fastcore algorithm is greedy approximation of the exact problem which can be
 import miom
 import numpy as np
 
-# Use the flux-consistent subnetwork (fcm) of the Human1 GEM model 
-m = miom.mio.load_gem('https://github.com/pablormier/miom-gems/raw/main/gems/homo_sapiens_human1_fcm.miom')
+# Use the flux-consistent subnetwork of the Human1 GEM model, available in the repository
+m = miom.load_gem('@SysBioChalmers/Human-GEM/v1.9.0/consistent')
 # Select reactions from the cholesterol metabolism as the core reactions to keep
 core_rxn = m.find_reactions_from_pathway("Cholesterol metabolism")
 print(sum(core_rxn))
@@ -25,11 +25,11 @@ weights[core_rxn == 1] = 1
 
 # Exact-Fastcore
 fmc = (miom
-        .load(m, solver=miom.Solvers.GUROBI_PYMIP)
-        .setup(opt_tol=0.01)
+        .load(m, solver=miom.Solvers.GUROBI)
+        .setup(opt_tol=0.02)
         .steady_state()
         .subset_selection(weights)
-        .keep(core_rxn == 1)
+        .keep(core_rxn==1)
         .solve(verbosity=1)
         .select_subnetwork(
             mode=miom.ExtractionMode.ABSOLUTE_FLUX_VALUE,
@@ -43,4 +43,13 @@ print(fmc.num_reactions)
 
 Note that the algorithm requires that the metabolic network used is flux consistent. If blocked reactions are included in the core set, the MIP becomes infeasible, as those reactions cannot be selected with a non-zero flux in steady state conditions.
 
-MIOM includes an implementation of the [swiftcore algorithm](https://mtefagh.github.io/swiftcore/) to obtain flux consistent metabolic networks. 
+MIOM includes an implementation of the [swiftcc algorithm](https://mtefagh.github.io/swiftcore/) to obtain flux consistent metabolic networks:
+
+!!! cite
+    Tefagh, M., & Boyd, S. P. (2020). SWIFTCORE: a tool for the context-specific reconstruction of genome-scale metabolic networks. BMC bioinformatics, 21(1), 1-14. [DOI: 10.1186/s12859-020-3440-y](https://doi.org/10.1186/s12859-020-3440-y).
+
+```python
+from miom.tools import consistent_subnetwork
+# Get the consistent subnetwork and the lp problem solved by swiftcc
+consistent, lp = consistent_subnetwork(m)
+```

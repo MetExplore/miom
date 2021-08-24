@@ -14,7 +14,7 @@ def irev_blocked_lp(S, R):
     """
     m, n = S.shape
     # Find irreversible reactions
-    irev_rxn = np.array([True if rxn['lb'] >= 0 else False for rxn in R])
+    irev_rxn = R['lb'] >= 0
     irev = m + np.where(irev_rxn)[0]
     A = np.concatenate((S.T, -np.eye(n)), axis=1)
     lb = np.concatenate(([-np.inf] * m, [0] * n))
@@ -46,11 +46,11 @@ def swiftcc(S, R, solver='glpk', verbosity=0):
     """
     from scipy.linalg import qr
     m, n = S.shape
-    rev = np.array([True if rxn['lb'] < 0 else False for rxn in R])
+    rev = R['lb'] < 0
     LP, V = irev_blocked_lp(S, R)
     LP.options.verbosity = verbosity
     LP.options.solver = solver
-    LP.solve()
+    lp_sol = LP.solve()
     consistent = np.array([True] * n)
     consistent[np.array(V[m:].value).squeeze() < -0.5] = False
     # Estimate the rank of the consistent matrix using qr
@@ -60,15 +60,18 @@ def swiftcc(S, R, solver='glpk', verbosity=0):
     srank = np.sum(np.abs(np.diag(R)) > tol)
     Z = Q[rev[consistent] == True, srank:]
     consistent[np.logical_and(consistent, rev == True)] = np.diag(np.dot(Z, Z.T)) > tol ** 2
-    return np.where(consistent == True)[0]
+    return np.where(consistent == True)[0], lp_sol
 
-def consistent_subnetwork(network, solver='glpk'):
-    """Finds the largest consistent subnetwork of the original network.
+def consistent_subnetwork(network, solver='glpk', verbosity=0):
+    """Finds the largest consistent subnetwork of the original network using SwiftCC.
+    Note that SwiftCC does not take into account the bounds of the reactions.
 
     Args:
         network (MiomNetwork): A MiomNetwork instance.
 
     Returns:
         MiomNetwork: Flux consistent subnetwork.
+        picos.modeling.solution: The solution of the LP problem.
     """
-    return network.subnet(swiftcc(network.S, network.R, solver=solver))
+    c, lp = swiftcc(network.S, network.R, solver=solver, verbosity=verbosity)
+    return network.subnet(c), lp
