@@ -3,7 +3,7 @@
 <span class=c1># Load a genome-scale metabolic network. You can load SMBL or Matlab metabolic networks</span>
 <span class=c1># as well using the same method, but it requires to have the cobratoolbox python library</span>
 <span class=c1># installed.</span>
-<span class=n>network</span> <span class=o>=</span> <span class=n>miom</span><span class=o>.</span><span class=n>mio</span><span class=o>.</span><span class=n>load_gem</span><span class=p>(</span><span class=s2>&quot;https://github.com/pablormier/miom-gems/raw/main/gems/mus_musculus_iMM1865.miom&quot;</span><span class=p>)</span>
+<span class=n>network</span> <span class=o>=</span> <span class=n>miom</span><span class=o>.</span><span class=n>load_gem</span><span class=p>(</span><span class=s2>&quot;@iMM1865&quot;</span><span class=p>)</span>
 
 <span class=c1># Create the sparse FBA problem to get a solution that maximizes</span>
 <span class=c1># the optimal flux through the BIOMASS_reaction minimizing the</span>
@@ -42,7 +42,7 @@
         <span class=c1># indicator values (X)</span>
         <span class=o>.</span><span class=n>get_values</span><span class=p>())</span>
 
-<span class=c1># Show reactions with a flux &gt; 1e-7</span>
+<span class=c1># Show reactions with a flux &gt; 1e-8</span>
 <span class=nb>print</span><span class=p>(</span><span class=s2>&quot;Number of reactions with flux above +/- 1e-8:&quot;</span><span class=p>,</span> <span class=nb>sum</span><span class=p>(</span><span class=nb>abs</span><span class=p>(</span><span class=n>V</span><span class=p>)</span> <span class=o>&gt;</span> <span class=mf>1e-8</span><span class=p>))</span>
 
 <span class=c1># Count reactions with an indicator value of 0 (active). Note that since</span>
