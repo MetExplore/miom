@@ -167,7 +167,7 @@ def _get_rxn_var_data(weighted_rxns, rxn_type):
     return None
 
 
-def load(network, solver=Solvers.COIN_OR_CBC):
+def load(network, solver=None):
     """
     Create a MIOM optimization model for a given solver.
     If the solver is Coin-OR CBC, an instance of PythonMipModel is used
@@ -180,13 +180,13 @@ def load(network, solver=Solvers.COIN_OR_CBC):
 
         ```python
         >>> import miom
-        >>> network = miom.mio.load_gem("https://github.com/pablormier/miom-gems/raw/main/gems/mus_musculus_iMM1865.miom")
-        >>> V, X = (miom
+        >>> network = miom.load_gem("@iMM1865")
+        >>> flx = (miom
                     .load(network)
                     .steady_state()
                     .set_rxn_objective("BIOMASS_reaction")
                     .solve(verbosity=1)
-                    .get_values())
+                    .get_fluxes('BIOMASS_reaction'))
         ```
 
     Args:
@@ -198,6 +198,14 @@ def load(network, solver=Solvers.COIN_OR_CBC):
         BaseModel: A BaseModel object, which can be PythonMipModel if CBC solver is
             used, or a PicosModel otherwise.
     """
+    if solver is None:
+        solvers = pc.solvers.available_solvers()
+        if "gurobi" in solvers:
+            solver = Solvers.GUROBI
+        elif "cplex" in solvers:
+            solver = Solvers.CPLEX
+        else:
+            solver = Solvers.COIN_OR_CBC
     solver = str(solver.value) if isinstance(solver, Enum) else str(solver)
     if isinstance(network, str):
         network = load_gem(network)
@@ -526,7 +534,7 @@ class BaseModel(ABC):
         return dict(idxs=idxs, valid_rxn_idx=valid_rxn_idx)
 
     @_composable
-    def subset_selection(self, rxn_weights, direction='max', eps=1e-2):
+    def subset_selection(self, rxn_weights, direction='max', eps=1e-2, strengthen=True):
         """Transform the current model into a subset selection problem.
 
         The subset selection problem consists of selecting the positive weighted
@@ -579,7 +587,7 @@ class BaseModel(ABC):
         rxnw = _weighted_rxns(self.network.R, rxn_weights)
         if self.variables.indicators is None:
             self.variables._assigned_reactions = rxnw
-            return dict(eps=eps, direction=direction)
+            return dict(eps=eps, direction=direction, strengthen=strengthen)
         else:
             raise ValueError("The current model is already a subset selection problem.")
 
@@ -617,10 +625,10 @@ class BaseModel(ABC):
     def exclude(self, indicator_values=None):
         """Exclude a solution from the set of feasible solutions.
 
-        If the problem is a subset_selection problem, it adds a new constraint
+        If the problem is a subset selection problem, it adds a new constraint
         to exclude the given values (or the current values of the indicator variables)
         from the set of feasible solutions. This is useful to force the solver to find
-        alternative solutions in a manual fashion.
+        alternative solutions in a manual fashion. https://doi.org/10.1371/journal.pcbi.1008730
         
 
         Args:
@@ -631,7 +639,7 @@ class BaseModel(ABC):
         """
         if self.variables.indicators is None:
             raise ValueError("""The optimization model does not contain indicator variables.
-            Make sure that the problem is a subset_selection problem.""")
+            Make sure that the problem is a subset selection problem.""")
         if indicator_values is None:
             indicator_values = np.array(self.variables.indicator_values)
         return dict(indicator_values=indicator_values)
@@ -948,10 +956,11 @@ class PicosModel(BaseModel):
             P.add_constraint(EB - V[J] >= 0)
             P.add_constraint(EC - V[J] <= 0)
         # Strengthen the formulation
-        idx = [np.array(x) for x in list(zip(*_get_reversible_vars(weighted_rxns)))]
-        if len(idx) > 0:
-            I, J = idx
-            P.add_constraint(X[I] + X[J] <= 1)
+        if kwargs["strengthen"] is True:
+            idx = [np.array(x) for x in list(zip(*_get_reversible_vars(weighted_rxns)))]
+            if len(idx) > 0:
+                I, J = idx
+                P.add_constraint(X[I] + X[J] <= 1)
         P.set_objective(kwargs['direction'], C.T * X)
         self.variables._indicator_vars = X
         return True
@@ -1105,8 +1114,9 @@ class PythonMipModel(BaseModel):
             else:
                 raise ValueError("Unknown type of reaction")
         # Strengthen the problem for RH+ and RH-
-        for i, j in _get_reversible_vars(weighted_rxns):
-            self.add_constraint(X[i] + X[j] <= 1)
+        if kwargs["strengthen"] is True:
+            for i, j in _get_reversible_vars(weighted_rxns):
+                self.add_constraint(X[i] + X[j] <= 1)
         P.objective = mip.xsum((c * X[i] for i, c in enumerate(C)))
         if direction == "max" or direction == "maximize":
             P.sense = mip.MAXIMIZE
