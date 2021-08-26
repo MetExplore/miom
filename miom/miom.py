@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from functools import wraps
 from collections.abc import Iterable
 from collections import defaultdict
-from miom.mio import load_gem, MiomNetwork
+from miom.mio import load_gem
 from typing import NamedTuple
 from enum import Enum, auto
 from time import perf_counter
@@ -680,11 +680,9 @@ class BaseModel(ABC):
         Returns:
             BaseModel: instance of BaseModel with the modifications applied.
         """
-        i, _ = self.network.find_reaction(rxn)
-        #cost = np.zeros((1, self.network.R.shape[0]))
+        i = self.network.get_reaction_id(rxn)
         cost = np.zeros(self.network.num_reactions)
         cost[i] = 1
-        #cost[0, i] = 1
         self.set_objective(cost, self.variables.fluxvars, direction=direction)
         return self
 
