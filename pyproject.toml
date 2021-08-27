@@ -12,13 +12,13 @@ include = ["LICENSE"]
 
 [tool.poetry.dependencies]
 python = "^3.6.1"
-numpy = "1.19"
+numpy = "^1.19.0"
 mip = "^1.13.0"
 PICOS = {version = "^2.2.52", optional = true}
 swiglpk = {version = "^5.0.3", optional = true}
 gurobipy = {version = "^9.1.2", optional = true}
 Mosek = {version = "^9.3.3", optional = true}
-cobra = {version = "0.22.0", optional = true}
+cobra = {version = "^0.22.0", optional = true}
 
 
 [tool.poetry.extras]
