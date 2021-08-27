@@ -1,27 +1,31 @@
 import numpy as np
 import warnings
-import picos as pc
 import mip
 from abc import ABC, abstractmethod
 from functools import wraps
 from collections.abc import Iterable
 from collections import defaultdict
-from miom.mio import load_gem, MiomNetwork
+from miom.mio import load_gem
 from typing import NamedTuple
 from enum import Enum, auto
 from time import perf_counter
 
+try:
+    import picos as pc
+    _PICOS_AVAILABLE = True
+except ImportError:
+    _PICOS_AVAILABLE = False
 
-_STATUS_MAPPING = {
-    mip.OptimizationStatus.OPTIMAL: pc.modeling.solution.SS_OPTIMAL,
-    mip.OptimizationStatus.FEASIBLE: pc.modeling.solution.SS_FEASIBLE,
-    mip.OptimizationStatus.INFEASIBLE: pc.modeling.solution.SS_INFEASIBLE,
-    mip.OptimizationStatus.UNBOUNDED: pc.modeling.solution.PS_UNBOUNDED,
-    mip.OptimizationStatus.INT_INFEASIBLE: pc.modeling.solution.SS_INFEASIBLE,
-    mip.OptimizationStatus.NO_SOLUTION_FOUND: pc.modeling.solution.PS_ILLPOSED,
-    mip.OptimizationStatus.LOADED: pc.modeling.solution.VS_EMPTY,
-    mip.OptimizationStatus.CUTOFF: pc.modeling.solution.SS_PREMATURE
-}
+
+class Status(str, Enum):
+    OPTIMAL = "optimal",
+    FEASIBLE = "feasible"
+    INFEASIBLE = "infeasible",
+    UNBOUNDED = "unbounded",
+    ILLPOSED = "illposed",
+    EMPTY = "empty",
+    PREMATURE = "premature",
+    UNKNOWN = "unknown"
 
 
 class Solvers(str, Enum):
@@ -55,6 +59,7 @@ class Solvers(str, Enum):
     SCIP = "scip",
     CVXOPT = "cvxopt",
     MOSEK = "mosek"
+
 
 class _ReactionType(Enum):
     RH_POS = auto(),
@@ -167,7 +172,7 @@ def _get_rxn_var_data(weighted_rxns, rxn_type):
     return None
 
 
-def load(network, solver=Solvers.COIN_OR_CBC):
+def load(network, solver=None):
     """
     Create a MIOM optimization model for a given solver.
     If the solver is Coin-OR CBC, an instance of PythonMipModel is used
@@ -180,13 +185,13 @@ def load(network, solver=Solvers.COIN_OR_CBC):
 
         ```python
         >>> import miom
-        >>> network = miom.mio.load_gem("https://github.com/pablormier/miom-gems/raw/main/gems/mus_musculus_iMM1865.miom")
-        >>> V, X = (miom
+        >>> network = miom.load_gem("@iMM1865")
+        >>> flx = (miom
                     .load(network)
                     .steady_state()
                     .set_rxn_objective("BIOMASS_reaction")
                     .solve(verbosity=1)
-                    .get_values())
+                    .get_fluxes('BIOMASS_reaction'))
         ```
 
     Args:
@@ -198,6 +203,15 @@ def load(network, solver=Solvers.COIN_OR_CBC):
         BaseModel: A BaseModel object, which can be PythonMipModel if CBC solver is
             used, or a PicosModel otherwise.
     """
+    if solver is None:
+        solver = Solvers.COIN_OR_CBC
+        if _PICOS_AVAILABLE:
+            solvers = pc.solvers.available_solvers()
+            if "gurobi" in solvers:
+                solver = Solvers.GUROBI
+            elif "cplex" in solvers:
+                solver = Solvers.CPLEX
+                
     solver = str(solver.value) if isinstance(solver, Enum) else str(solver)
     if isinstance(network, str):
         network = load_gem(network)
@@ -526,7 +540,7 @@ class BaseModel(ABC):
         return dict(idxs=idxs, valid_rxn_idx=valid_rxn_idx)
 
     @_composable
-    def subset_selection(self, rxn_weights, direction='max', eps=1e-2):
+    def subset_selection(self, rxn_weights, direction='max', eps=1e-2, strengthen=True):
         """Transform the current model into a subset selection problem.
 
         The subset selection problem consists of selecting the positive weighted
@@ -579,10 +593,9 @@ class BaseModel(ABC):
         rxnw = _weighted_rxns(self.network.R, rxn_weights)
         if self.variables.indicators is None:
             self.variables._assigned_reactions = rxnw
-            return dict(eps=eps, direction=direction)
+            return dict(eps=eps, direction=direction, strengthen=strengthen)
         else:
-            warnings.warn("Indicator variables were already assigned")
-            return False
+            raise ValueError("The current model is already a subset selection problem.")
 
     @_composable
     def set_flux_bounds(self, rxn_id, min_flux=None, max_flux=None):
@@ -618,10 +631,10 @@ class BaseModel(ABC):
     def exclude(self, indicator_values=None):
         """Exclude a solution from the set of feasible solutions.
 
-        If the problem is a subset_selection problem, it adds a new constraint
+        If the problem is a subset selection problem, it adds a new constraint
         to exclude the given values (or the current values of the indicator variables)
         from the set of feasible solutions. This is useful to force the solver to find
-        alternative solutions in a manual fashion.
+        alternative solutions in a manual fashion. https://doi.org/10.1371/journal.pcbi.1008730
         
 
         Args:
@@ -632,7 +645,7 @@ class BaseModel(ABC):
         """
         if self.variables.indicators is None:
             raise ValueError("""The optimization model does not contain indicator variables.
-            Make sure that the problem is a subset_selection problem.""")
+            Make sure that the problem is a subset selection problem.""")
         if indicator_values is None:
             indicator_values = np.array(self.variables.indicator_values)
         return dict(indicator_values=indicator_values)
@@ -673,11 +686,9 @@ class BaseModel(ABC):
         Returns:
             BaseModel: instance of BaseModel with the modifications applied.
         """
-        i, _ = self.network.find_reaction(rxn)
-        #cost = np.zeros((1, self.network.R.shape[0]))
+        i = self.network.get_reaction_id(rxn)
         cost = np.zeros(self.network.num_reactions)
         cost[i] = 1
-        #cost[0, i] = 1
         self.set_objective(cost, self.variables.fluxvars, direction=direction)
         return self
 
@@ -949,10 +960,11 @@ class PicosModel(BaseModel):
             P.add_constraint(EB - V[J] >= 0)
             P.add_constraint(EC - V[J] <= 0)
         # Strengthen the formulation
-        idx = [np.array(x) for x in list(zip(*_get_reversible_vars(weighted_rxns)))]
-        if len(idx) > 0:
-            I, J = idx
-            P.add_constraint(X[I] + X[J] <= 1)
+        if kwargs["strengthen"] is True:
+            idx = [np.array(x) for x in list(zip(*_get_reversible_vars(weighted_rxns)))]
+            if len(idx) > 0:
+                I, J = idx
+                P.add_constraint(X[I] + X[J] <= 1)
         P.set_objective(kwargs['direction'], C.T * X)
         self.variables._indicator_vars = X
         return True
@@ -1022,6 +1034,18 @@ class PicosModel(BaseModel):
 
 
 class PythonMipModel(BaseModel):
+    
+    _status_eq = {
+        mip.OptimizationStatus.OPTIMAL: Status.OPTIMAL,
+        mip.OptimizationStatus.FEASIBLE: Status.FEASIBLE,
+        mip.OptimizationStatus.INFEASIBLE: Status.INFEASIBLE,
+        mip.OptimizationStatus.UNBOUNDED: Status.UNBOUNDED,
+        mip.OptimizationStatus.INT_INFEASIBLE: Status.INFEASIBLE,
+        mip.OptimizationStatus.NO_SOLUTION_FOUND: Status.ILLPOSED,
+        mip.OptimizationStatus.LOADED: Status.EMPTY,
+        mip.OptimizationStatus.CUTOFF: Status.PREMATURE
+    }
+
     def __init__(self, previous_step_model=None, miom_network=None, solver_name=None):
         super().__init__(previous_step_model=previous_step_model,
                          miom_network=miom_network,
@@ -1106,8 +1130,9 @@ class PythonMipModel(BaseModel):
             else:
                 raise ValueError("Unknown type of reaction")
         # Strengthen the problem for RH+ and RH-
-        for i, j in _get_reversible_vars(weighted_rxns):
-            self.add_constraint(X[i] + X[j] <= 1)
+        if kwargs["strengthen"] is True:
+            for i, j in _get_reversible_vars(weighted_rxns):
+                self.add_constraint(X[i] + X[j] <= 1)
         P.objective = mip.xsum((c * X[i] for i, c in enumerate(C)))
         if direction == "max" or direction == "maximize":
             P.sense = mip.MAXIMIZE
@@ -1152,7 +1177,7 @@ class PythonMipModel(BaseModel):
             self.problem.sense = mip.MINIMIZE
         self.problem.objective = (
             mip.xsum(
-                (float(cost_vector[i]) * variables[i] for i in range(len(variables)))
+                float(cost_vector[i]) * variables[i] for i in range(len(variables))
             ) 
         )      
         return True
@@ -1174,11 +1199,10 @@ class PythonMipModel(BaseModel):
         
 
     def get_solver_status(self):
-        #solver_status['elapsed_seconds'] = self.problem.search_progress_log.log[-1:][0][0]
         return {
-            "status": _STATUS_MAPPING[self.problem.status] \
-                if self.problem.status in _STATUS_MAPPING \
-                     else pc.modeling.solution.PS_UNKNOWN,
+            "status": PythonMipModel._status_eq[self.problem.status] \
+                if self.problem.status in PythonMipModel._status_eq \
+                     else Status.UNKNOWN,
             "objective_value": self.problem.objective_value,
             "elapsed_seconds": self.last_solver_time
         }

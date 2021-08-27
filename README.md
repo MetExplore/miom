@@ -26,6 +26,8 @@ Here is a simple example of the differences of implementing from scratch a simpl
 
 > NOTE: This library is functional but still in a very early stage. API is still not stable and might be changed in future versions.
 
+MIOM is a Python library that offers a high-level API for creating and solving constraint-based metabolic optimization problems, with special emphasis on modeling them as Mixed Integer Optimization (MIO) problems to exploit the power of modern solvers. MIOM is designed to be used in a Python environment, and it is compatible with cobrapy and other Python-based modeling packages.
+
 
 ```python
 import miom
@@ -56,23 +58,33 @@ print("Number of active reactions:", sum(abs(V) > 1e-8))
 
 ## Installation
 
-### Minimal install
+### Recommended installation
 
-By default, MIOM comes with support for COIN-OR CBC solver and GLPK using the swiglpk wrapper. To install MIOM with minimal dependencies, run:
+The recommended installation with pip using the option `all` includes PICOS and Python-MIP backends, and the interfaces for [GLPK](https://www.gnu.org/software/glpk/), [Gurobi](https://www.gurobi.com/downloads) and [Mosek](https://www.mosek.com/downloads/):
+
+```
+pip install miom[all]
+```
+
+### Minimal installation
+
+By default, MIOM comes only with the Python-MIP backend and the COIN-OR CBC solver. The minimal installation is perfect to use in online notebooks and for sharing minimal reproducible examples. To install MIOM with minimal dependencies, run:
 
 ```
 pip install miom
 ```
 
-### Full install
+### Full installation
 
-The full install option of `miom` comes also with the interfaces for [Gurobi](https://www.gurobi.com/downloads) and [Mosek](https://www.mosek.com/downloads/). Also, in order to be able to import metabolic networks in different formats (SBML, Matlab, YAML, etc), you need to install the additional `cobra` and `scipy` packages:
+The full install option of `miom` comes with all the packages included with the `all` option, and the additional [COBRA]() package. This adds also support for importing any kind of genome-scale metabolic network supported by cobra with the `miom.load_gem()` method:
 
 ```
-pip install miom[all] cobra scipy
+pip install miom[full]
 ```
 
-CPLEX is also supported, but requires a valid license. To install MIOM with CPLEX support, follow the instructions on the [CPLEX page](https://www.ibm.com/docs/en/icos/12.8.0.0?topic=cplex-setting-up-python-api) to install your current version of cplex in your python environment.
+### Installing CPLEX
+
+CPLEX is also supported but requires a prior installation of CPLEX in the system with a valid license that cannot be configured through `pip`. To install MIOM with CPLEX support, follow the instructions on the [CPLEX page](https://www.ibm.com/docs/en/icos/12.8.0.0?topic=cplex-setting-up-python-api) to install your current version of cplex in your python environment.
 
 
 ## Quick start
