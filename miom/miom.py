@@ -1,6 +1,5 @@
 import numpy as np
 import warnings
-import picos as pc
 import mip
 from abc import ABC, abstractmethod
 from functools import wraps
@@ -11,17 +10,22 @@ from typing import NamedTuple
 from enum import Enum, auto
 from time import perf_counter
 
+try:
+    import picos as pc
+    _PICOS_AVAILABLE = True
+except ImportError:
+    _PICOS_AVAILABLE = False
 
-_STATUS_MAPPING = {
-    mip.OptimizationStatus.OPTIMAL: pc.modeling.solution.SS_OPTIMAL,
-    mip.OptimizationStatus.FEASIBLE: pc.modeling.solution.SS_FEASIBLE,
-    mip.OptimizationStatus.INFEASIBLE: pc.modeling.solution.SS_INFEASIBLE,
-    mip.OptimizationStatus.UNBOUNDED: pc.modeling.solution.PS_UNBOUNDED,
-    mip.OptimizationStatus.INT_INFEASIBLE: pc.modeling.solution.SS_INFEASIBLE,
-    mip.OptimizationStatus.NO_SOLUTION_FOUND: pc.modeling.solution.PS_ILLPOSED,
-    mip.OptimizationStatus.LOADED: pc.modeling.solution.VS_EMPTY,
-    mip.OptimizationStatus.CUTOFF: pc.modeling.solution.SS_PREMATURE
-}
+
+class Status(str, Enum):
+    OPTIMAL = "optimal",
+    FEASIBLE = "feasible"
+    INFEASIBLE = "infeasible",
+    UNBOUNDED = "unbounded",
+    ILLPOSED = "illposed",
+    EMPTY = "empty",
+    PREMATURE = "premature",
+    UNKNOWN = "unknown"
 
 
 class Solvers(str, Enum):
@@ -55,6 +59,7 @@ class Solvers(str, Enum):
     SCIP = "scip",
     CVXOPT = "cvxopt",
     MOSEK = "mosek"
+
 
 class _ReactionType(Enum):
     RH_POS = auto(),
@@ -199,13 +204,14 @@ def load(network, solver=None):
             used, or a PicosModel otherwise.
     """
     if solver is None:
-        solvers = pc.solvers.available_solvers()
-        if "gurobi" in solvers:
-            solver = Solvers.GUROBI
-        elif "cplex" in solvers:
-            solver = Solvers.CPLEX
-        else:
-            solver = Solvers.COIN_OR_CBC
+        solver = Solvers.COIN_OR_CBC
+        if _PICOS_AVAILABLE:
+            solvers = pc.solvers.available_solvers()
+            if "gurobi" in solvers:
+                solver = Solvers.GUROBI
+            elif "cplex" in solvers:
+                solver = Solvers.CPLEX
+                
     solver = str(solver.value) if isinstance(solver, Enum) else str(solver)
     if isinstance(network, str):
         network = load_gem(network)
@@ -1028,6 +1034,18 @@ class PicosModel(BaseModel):
 
 
 class PythonMipModel(BaseModel):
+    
+    _status_eq = {
+        mip.OptimizationStatus.OPTIMAL: Status.OPTIMAL,
+        mip.OptimizationStatus.FEASIBLE: Status.FEASIBLE,
+        mip.OptimizationStatus.INFEASIBLE: Status.INFEASIBLE,
+        mip.OptimizationStatus.UNBOUNDED: Status.UNBOUNDED,
+        mip.OptimizationStatus.INT_INFEASIBLE: Status.INFEASIBLE,
+        mip.OptimizationStatus.NO_SOLUTION_FOUND: Status.ILLPOSED,
+        mip.OptimizationStatus.LOADED: Status.EMPTY,
+        mip.OptimizationStatus.CUTOFF: Status.PREMATURE
+    }
+
     def __init__(self, previous_step_model=None, miom_network=None, solver_name=None):
         super().__init__(previous_step_model=previous_step_model,
                          miom_network=miom_network,
@@ -1159,7 +1177,7 @@ class PythonMipModel(BaseModel):
             self.problem.sense = mip.MINIMIZE
         self.problem.objective = (
             mip.xsum(
-                (float(cost_vector[i]) * variables[i] for i in range(len(variables)))
+                float(cost_vector[i]) * variables[i] for i in range(len(variables))
             ) 
         )      
         return True
@@ -1181,11 +1199,10 @@ class PythonMipModel(BaseModel):
         
 
     def get_solver_status(self):
-        #solver_status['elapsed_seconds'] = self.problem.search_progress_log.log[-1:][0][0]
         return {
-            "status": _STATUS_MAPPING[self.problem.status] \
-                if self.problem.status in _STATUS_MAPPING \
-                     else pc.modeling.solution.PS_UNKNOWN,
+            "status": PythonMipModel._status_eq[self.problem.status] \
+                if self.problem.status in PythonMipModel._status_eq \
+                     else Status.UNKNOWN,
             "objective_value": self.problem.objective_value,
             "elapsed_seconds": self.last_solver_time
         }

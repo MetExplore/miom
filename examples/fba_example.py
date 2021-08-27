@@ -4,7 +4,7 @@ import miom
 m = miom.load_gem('@iMM1865')
 
 target = 'BIOMASS_reaction'
-opt_flux = (miom.load(network=m, solver=miom.Solvers.GLPK)
+opt_flux = (miom.load(m, solver=miom.Solvers.GLPK)
                 .steady_state()
                 .set_rxn_objective(target)
                 .solve(verbosity=1)
