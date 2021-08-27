@@ -211,7 +211,7 @@ def load(network, solver=None):
                 solver = Solvers.GUROBI
             elif "cplex" in solvers:
                 solver = Solvers.CPLEX
-                
+
     solver = str(solver.value) if isinstance(solver, Enum) else str(solver)
     if isinstance(network, str):
         network = load_gem(network)
@@ -219,8 +219,12 @@ def load(network, solver=None):
         return PythonMipModel(miom_network=network, solver_name=solver)
     if solver == 'gurobi_pymip':
         return PythonMipModel(miom_network=network, solver_name='gurobi')
-    else:
+    if _PICOS_AVAILABLE:
         return PicosModel(miom_network=network, solver_name=solver)
+    else:
+        raise Exception("""PICOS is not installed. Please install it with pip, 
+                        or reinstall miom with the right options, for example with:
+                        'pip install miom[all]'.""")
 
 
 class _Variables(ABC):
