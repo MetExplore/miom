@@ -1,17 +1,14 @@
 from miom.miom import (
     Comparator, 
-    ExtractionMode, 
-    BaseModel,
-    PythonMipModel,
-    PicosModel
+    ExtractionMode
 )
 import miom
 import pytest
 import pathlib
 import numpy as np
 
-_BLACKLIST = {'ecos', 'cvxopt', 'scip'} # SCIP does not work well with PICOS
 _SOLVERS = {'cbc'}
+_BLACKLIST = {'ecos', 'cvxopt', 'scip'} # SCIP does not work well with PICOS
 
 try:
     import picos as pc
