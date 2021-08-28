@@ -5,24 +5,32 @@ from miom.miom import (
     PythonMipModel,
     PicosModel
 )
-from miom.mio import load_gem
+import miom
 import pytest
 import pathlib
 import numpy as np
+
+_BLACKLIST = {'ecos', 'cvxopt', 'scip'} # SCIP does not work well with PICOS
+_SOLVERS = {'cbc'}
+
+try:
+    import picos as pc
+    _SOLVERS |= set(pc.solvers.available_solvers()) - _BLACKLIST
+except ImportError:
+    pass
 
 
 @pytest.fixture()
 def gem():
     file = pathlib.Path(__file__).parent.joinpath("models", "example_r13m10.miom")
-    return load_gem(str(file))
+    return miom.load_gem(str(file))
 
-@pytest.fixture(params=[PythonMipModel, PicosModel])
+@pytest.fixture(params=_SOLVERS)
 def model(request, gem):
     # Get the different implementations and instantiate
     # them providing the test gem
-    impl = request.param
-    solver = 'cbc' if impl == PythonMipModel else 'glpk'
-    return impl(miom_network=gem, solver_name=solver)
+    solver = request.param
+    return miom.load(gem, solver=solver)
 
 def prepare_fba(model, rxn=None, direction='max'):
     m = model.steady_state()

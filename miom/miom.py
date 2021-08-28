@@ -910,6 +910,8 @@ class PicosModel(BaseModel):
         self.problem.options["abs_prim_fsb_tol"] = kwargs["feas_tol"] if "feas_tol" in kwargs else self._options["feas_tol"]
         self.problem.options["abs_dual_fsb_tol"] = self.problem.options["abs_prim_fsb_tol"]
         self.problem.options["solver"] = kwargs["solver"] if "solver" in kwargs else self._options["solver"]
+        if self._options['solver'] == 'scip':
+            self.problem.options["duals"] = False  
         return True
 
     def _reset(self, **kwargs):

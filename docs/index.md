@@ -54,11 +54,21 @@ Here is a simple example of the differences of implementing from scratch a simpl
 
 ### Recommended installation
 
-The recommended installation with pip using the option `all` includes PICOS and Python-MIP backends, and the interfaces for [GLPK](https://www.gnu.org/software/glpk/), [Gurobi](https://www.gurobi.com/downloads) and [Mosek](https://www.mosek.com/downloads/):
+The recommended installation with pip using the option `all` includes PICOS and Python-MIP backends, and the extra interfaces for [GLPK](https://www.gnu.org/software/glpk/), [Gurobi](https://www.gurobi.com/downloads) and [Mosek](https://www.mosek.com/downloads/):
 
 ```
 pip install miom[all]
 ```
+
+With this installation, the following solvers (with support for Mixed Integer OptimizatioN) are ready to use:
+* GLPK: Out-of-the-box support (PICOS backend + swiglpk)
+* Coin-OR CBC: Out-of-the-box support (Python-MIP backend), used by default
+* Gurobi: Requires that the Gurobi Optimizer is installed in the system with a valid license (PICOS and Python-MIP backends)
+* Mosek: Requires that the Mosek Optimizer is installed in the system with a valid license (PICOS backend)
+* CPLEX: Requires that the CPLEX Optimizer is installed in the system with a valid license (PICOS backend)
+* SCIP: Supported through the PySCIPOpt packabe, can be installed using conda ([PySCIPOpt](https://github.com/scipopt/PySCIPOpt) + PICOS backend)
+
+
 
 ### Minimal installation
 
@@ -70,7 +80,7 @@ pip install miom
 
 ### Full installation
 
-The full install option of `miom` comes with all the packages included with the `all` option, and the additional [COBRA]() package. This adds also support for importing any kind of genome-scale metabolic network supported by cobra with the `miom.load_gem()` method:
+The full install option of `miom` comes with all the packages included with the `all` option, and the additional [COBRA](https://cobrapy.readthedocs.io/en/latest/) package. This adds also support for importing any kind of genome-scale metabolic network supported by cobra with the `miom.load_gem()` method:
 
 ```
 pip install miom[full]

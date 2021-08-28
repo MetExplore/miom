@@ -57,11 +57,20 @@ print("Number of active reactions:", sum(abs(V) > 1e-8))
 
 ### Recommended installation
 
-The recommended installation with pip using the option `all` includes PICOS and Python-MIP backends, and the interfaces for [GLPK](https://www.gnu.org/software/glpk/), [Gurobi](https://www.gurobi.com/downloads) and [Mosek](https://www.mosek.com/downloads/):
+The recommended installation with pip using the option `all` includes PICOS and Python-MIP backends, and the extra interfaces for [GLPK](https://www.gnu.org/software/glpk/), [Gurobi](https://www.gurobi.com/downloads) and [Mosek](https://www.mosek.com/downloads/):
 
 ```
 pip install miom[all]
 ```
+
+With this installation, the following solvers (with support for Mixed Integer Optimization) are ready to use:
+* Coin-OR CBC: Out-of-the-box support (Python-MIP backend), used by default
+* GLPK: Out-of-the-box support (PICOS backend + swiglpk)
+* Gurobi: Requires that the Gurobi Optimizer is installed in the system with a valid license (PICOS and Python-MIP backends)
+* Mosek: Requires that the Mosek Optimizer is installed in the system with a valid license (PICOS backend)
+* CPLEX: Requires that the CPLEX Optimizer is installed in the system with a valid license (PICOS backend)
+* SCIP: Supported through the PySCIPOpt package, can be installed using conda ([PySCIPOpt](https://github.com/scipopt/PySCIPOpt) + PICOS backend)
+
 
 ### Minimal installation
 
