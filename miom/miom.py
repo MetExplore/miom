@@ -12,12 +12,24 @@ from time import perf_counter
 
 try:
     import picos as pc
-    _PICOS_AVAILABLE = True
+    _picos_backend_available = True
 except ImportError:
-    _PICOS_AVAILABLE = False
+    _picos_backend_available = False
 
 
 class Status(str, Enum):
+    """Subset of PICOS solver status codes.
+
+    This subset of states offers compatibility between Python-MIP and PICOS.
+    Status codes can be obtained after solving an optimization problem with
+    the property `status`. For example:
+
+    ```python
+    >>> import miom
+    >>> miom.load('@iMM1865').steady_state().set_rxn_objective('BIOMASS_reaction').solve().status
+    {'status': 'optimal', 'objective_value': 798.811, 'elapsed_seconds': 0.479}
+    ```
+    """
     OPTIMAL = "optimal",
     FEASIBLE = "feasible"
     INFEASIBLE = "infeasible",
@@ -205,7 +217,7 @@ def load(network, solver=None):
     """
     if solver is None:
         solver = Solvers.COIN_OR_CBC
-        if _PICOS_AVAILABLE:
+        if _picos_backend_available:
             solvers = pc.solvers.available_solvers()
             if "gurobi" in solvers:
                 solver = Solvers.GUROBI
@@ -219,7 +231,7 @@ def load(network, solver=None):
         return PythonMipModel(miom_network=network, solver_name=solver)
     if solver == 'gurobi_pymip':
         return PythonMipModel(miom_network=network, solver_name='gurobi')
-    if _PICOS_AVAILABLE:
+    if _picos_backend_available:
         return PicosModel(miom_network=network, solver_name=solver)
     else:
         raise Exception("""PICOS is not installed. Please install it with pip, 
@@ -642,7 +654,7 @@ class BaseModel(ABC):
         
 
         Args:
-            values (list, optional): List of values for each indicator variable. Defaults to None.
+            indicator_values (list, optional): List of values for each indicator variable. Defaults to None.
 
         Returns:
             BaseModel: instance of BaseModel with the modifications applied.

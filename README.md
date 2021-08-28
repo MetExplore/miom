@@ -26,9 +26,6 @@ Here is a simple example of the differences of implementing from scratch a simpl
 
 > NOTE: This library is functional but still in a very early stage. API is still not stable and might be changed in future versions.
 
-MIOM is a Python library that offers a high-level API for creating and solving constraint-based metabolic optimization problems, with special emphasis on modeling them as Mixed Integer Optimization (MIO) problems to exploit the power of modern solvers. MIOM is designed to be used in a Python environment, and it is compatible with cobrapy and other Python-based modeling packages.
-
-
 ```python
 import miom
 
