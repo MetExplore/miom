@@ -1175,10 +1175,11 @@ class PythonMipModel(BaseModel):
 
     def _steady_state(self, **kwargs):
         V = [self.problem.add_var(lb=rxn['lb'], ub=rxn['ub'], name=f"V_{i}") for i, rxn in enumerate(self.network.R)]
-        # (Python-MIP does not allow matrix operations like CyLP or CXVOPT)
         for i in range(self.network.S.shape[0]):
-            self.problem += mip.xsum(self.network.S[i, j] * V[j]
-                                     for j in range(self.network.R.shape[0]) if self.network.S[i, j] != 0) == 0
+            non_zero_cols = np.flatnonzero(self.network.S[i, :] != 0)
+            if len(non_zero_cols) > 0:
+                self.problem += mip.xsum(self.network.S[i, j] * V[j]
+                    for j in non_zero_cols) == 0
         self.variables._flux_vars = V
         return True
 
