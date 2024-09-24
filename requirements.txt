@@ -1,4 +1,4 @@
 mip==1.13.0
-numpy==1.19.5
+numpy==1.26.4
 PICOS==2.2.52
 swiglpk==5.0.10
