@@ -18,7 +18,7 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           python -m pip install flake8 pytest
-          python -m pip install mkdocs-material mkdocstrings mkdocs-minify-plugin
+          python -m pip install mkdocs-material==7.2.1 mkdocstrings==0.15.2 mkdocs-minify-plugin
           
           
       - name: Set up Python 3.9
