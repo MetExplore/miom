@@ -2,37 +2,30 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://metexplore.github.io/miom/</loc>
-         <lastmod>2022-03-22</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2024-09-24</lastmod>
     </url>
     <url>
          <loc>https://metexplore.github.io/miom/examples/fastcore/</loc>
-         <lastmod>2022-03-22</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2024-09-24</lastmod>
     </url>
     <url>
          <loc>https://metexplore.github.io/miom/examples/fba/</loc>
-         <lastmod>2022-03-22</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2024-09-24</lastmod>
     </url>
     <url>
          <loc>https://metexplore.github.io/miom/examples/imat/</loc>
-         <lastmod>2022-03-22</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2024-09-24</lastmod>
     </url>
     <url>
          <loc>https://metexplore.github.io/miom/examples/sparse_fba/</loc>
-         <lastmod>2022-03-22</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2024-09-24</lastmod>
     </url>
     <url>
          <loc>https://metexplore.github.io/miom/references/mio/</loc>
-         <lastmod>2022-03-22</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2024-09-24</lastmod>
     </url>
     <url>
          <loc>https://metexplore.github.io/miom/references/miom/</loc>
-         <lastmod>2022-03-22</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2024-09-24</lastmod>
     </url>
 </urlset>
