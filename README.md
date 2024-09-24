@@ -266,7 +266,14 @@ The documentation of the library can be found at https://metexplore.github.io/mi
 
 ## How to cite
 
-Manuscript in progress
+```
+@misc{rodriguezmier_miom21,
+  author       = {Rodriguez-Mier, Pablo and Fresnais, Louison and Poupin, Nathalie and Jourdan, Fabien},
+  title        = {MIOM: Mixed Integer Optimization for Metabolism},
+  year         = {2021},
+  howpublished = {\url{https://github.com/MetExplore/miom}}
+}
+```
 
 ## License
 
