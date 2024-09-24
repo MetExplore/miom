@@ -2,4 +2,4 @@ mip==1.13.0
 numpy==1.19.5
 PICOS==2.2.52
 pytest==6.2.4
-swiglpk==5.0.3
+swiglpk==5.0.10
